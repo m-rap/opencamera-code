@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusMoveCallback;
@@ -592,7 +594,7 @@ public class CameraController1 extends CameraController {
         }
         List<String> values = null;
         if( iso_values != null && iso_values.length() > 0 ) {
-            if( MyDebug.LOG )
+            //if( MyDebug.LOG )
                 Log.d(TAG, "iso_values: " + iso_values);
             String [] isos_array = iso_values.split(",");
             // split shouldn't return null
@@ -652,6 +654,9 @@ public class CameraController1 extends CameraController {
 		//values.add("1600");
 		iso_key = "iso";*/
         if( iso_key != null ){
+            supportedIsosInt = new ArrayList<>();
+            supportedIsos = new SupportedValues(new ArrayList<String>(), "");
+            supportedIsosInt.add(-1);
             if( values == null ) {
                 // set a default for some devices which have an iso_key, but don't give a list of supported ISOs
                 values = new ArrayList<>();
@@ -669,11 +674,37 @@ public class CameraController1 extends CameraController {
                     Log.d(TAG, "set: " + iso_key + " to: " + supported_values.selected_value);
                 parameters.set(iso_key, supported_values.selected_value);
                 setCameraParameters(parameters);
+                this.supportedIsos = supported_values;
+                for (String iso : supported_values.values) {
+                    Matcher m = Pattern.compile("[0-9]+").matcher(iso);
+                    if (m.find()) {
+                        String v = "";
+                        try {
+                            v = m.group(0);
+                            supportedIsosInt.add(Integer.parseInt(v));
+                        } catch (Exception ex) {
+                            Log.d(TAG, "Failed parsing iso value " + v + ": " + ex.getMessage());
+                        }
+                    } else {
+                        Log.d(TAG, "iso value " + iso + " doesn't contain numbers");
+                    }
+                }
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < supportedIsosInt.size(); i++) {
+                    sb.append(supportedIsosInt.get(i));
+                    if (i < supportedIsosInt.size() - 1) {
+                        sb.append(",");
+                    }
+                }
+                Log.d(TAG, "isos in int " + sb.toString());
             }
             return supported_values;
         }
         return null;
     }
+
+    SupportedValues supportedIsos = new SupportedValues(new ArrayList<String>(), "");
+    ArrayList<Integer> supportedIsosInt = new ArrayList<>();
 
     @Override
     public String getISOKey() {
@@ -682,21 +713,36 @@ public class CameraController1 extends CameraController {
         return this.iso_key;
     }
 
+    private boolean manual_iso = false;
+
     @Override
     public void setManualISO(boolean manual_iso, int iso) {
         // not supported for CameraController1
+        this.manual_iso = manual_iso;
+        if (manual_iso) {
+            setISO(iso);
+        }
     }
 
     @Override
     public boolean isManualISO() {
         // not supported for CameraController1
-        return false;
+        //return false;
+
+        return manual_iso;
     }
 
     @Override
     public boolean setISO(int iso) {
         // not supported for CameraController1
         return false;
+
+        //for (Integer sIso : supportedIsosInt) {
+        //    if (iso < sIso && sIso != -1) {
+        //        Camera.Parameters params = getParameters();
+        //        params.set(iso_key, );
+        //    }
+        //}
     }
 
     @Override
