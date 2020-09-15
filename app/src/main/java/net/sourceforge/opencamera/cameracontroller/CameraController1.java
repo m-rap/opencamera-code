@@ -771,10 +771,11 @@ public class CameraController1 extends CameraController {
         // not supported for CameraController1
         //return false;
 
+        int sIso = 0, sel = 0;
         for (int i = 0; i < supportedIsosInt.size(); i++) {
-            int sIso = supportedIsosInt.get(i);
+            sIso = supportedIsosInt.get(i);
+            sel = i;
             if (iso < sIso) {
-                int sel = i;
                 currIso = sIso;
                 if (i > 0) {
                     int prevIso = supportedIsosInt.get(i - 1);
@@ -789,8 +790,15 @@ public class CameraController1 extends CameraController {
             }
         }
 
-        manualIso = false;
-        return false;
+        if (sIso == 0) {
+            manualIso = false;
+            currIso = 0;
+            return false;
+        }
+
+        Camera.Parameters params = getParameters();
+        params.set(iso_key, supportedIsos.values.get(sel));
+        return true;
     }
 
     @Override
