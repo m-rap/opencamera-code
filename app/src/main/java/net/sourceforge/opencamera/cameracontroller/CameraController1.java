@@ -2,6 +2,9 @@ package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -146,7 +149,34 @@ public class CameraController1 extends CameraController {
     private Camera.Parameters getParameters() {
         if( MyDebug.LOG )
             Log.d(TAG, "getParameters");
-        return camera.getParameters();
+
+        Camera.Parameters parameters = camera.getParameters();
+
+        File f = new File("/sdcard/opencamera backup/camera_parameters.txt");
+        if (!f.exists()) {
+            try {
+                String parStr = parameters.flatten();
+                FileOutputStream fos = new FileOutputStream(f);
+                String[] parStrs = parStr.split(";");
+                byte[] toWrite = new byte[parStr.length() + 1];
+                int p = 0;
+                for (int i = 0; i < parStrs.length; i++) {
+                    byte[] srcBytes = parStrs[i].getBytes();
+                    System.arraycopy(srcBytes, 0, toWrite, p, srcBytes.length);
+                    p += srcBytes.length;
+
+                    toWrite[p] = '\n';
+                    p += 1;
+                }
+                fos.write(toWrite, 0, p);
+                Log.d(TAG, "p length " + p + " " + toWrite.length);
+                fos.close();
+            } catch (Exception e) {
+                Log.d(TAG, e.getMessage());
+            }
+        }
+
+        return parameters;
     }
 
     private void setCameraParameters(Camera.Parameters parameters) {
