@@ -1285,6 +1285,16 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
+    public void setAutoExposureMeteringMode(AEMeteringMode mode) {
+
+    }
+
+    @Override
+    public AEMeteringMode getAutoExposureMeteringMode() {
+        return AEMeteringMode.AEMETERING_OFF;
+    }
+
+    @Override
     public void setAutoWhiteBalanceLock(boolean enabled) {
         Camera.Parameters parameters = this.getParameters();
         parameters.setAutoWhiteBalanceLock(enabled);

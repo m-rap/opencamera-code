@@ -508,6 +508,14 @@ public abstract class CameraController {
     public abstract void setRecordingHint(boolean hint);
     public abstract void setAutoExposureLock(boolean enabled);
     public abstract boolean getAutoExposureLock();
+    public enum AEMeteringMode {
+        AEMETERING_AVERAGE,
+        AEMETERING_SPOT,
+        AEMETERING_CENTER,
+        AEMETERING_OFF
+    }
+    public abstract void setAutoExposureMeteringMode(AEMeteringMode mode);
+    public abstract AEMeteringMode getAutoExposureMeteringMode();
     public abstract void setAutoWhiteBalanceLock(boolean enabled);
     public abstract boolean getAutoWhiteBalanceLock();
     public abstract void setRotation(int rotation);

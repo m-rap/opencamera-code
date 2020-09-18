@@ -263,7 +263,8 @@ public class CameraController2 extends CameraController {
     private float capture_result_focus_distance_min;
     private float capture_result_focus_distance_max;*/
     private final static long max_preview_exposure_time_c = 1000000000L/12;
-    
+    private AEMeteringMode ae_metering_mode = AEMeteringMode.AEMETERING_OFF;
+
     private enum RequestTagType {
         CAPTURE, // request is either for a regular non-burst capture, or the last of a burst capture sequence
         CAPTURE_BURST_IN_PROGRESS // request is for a burst capture, but isn't the last of the burst capture sequence
@@ -4575,6 +4576,25 @@ public class CameraController2 extends CameraController {
     }
 
     @Override
+    public void setAutoExposureMeteringMode(AEMeteringMode mode) {
+        ae_metering_mode = mode;
+        clearFocusAndMetering();
+    }
+
+    @Override
+    public AEMeteringMode getAutoExposureMeteringMode() {
+        if (characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0) {
+            // if supported, set default to average
+            if (ae_metering_mode == AEMeteringMode.AEMETERING_OFF) {
+                ae_metering_mode = AEMeteringMode.AEMETERING_AVERAGE;
+            }
+        } else {
+            ae_metering_mode = AEMeteringMode.AEMETERING_OFF;
+        }
+        return ae_metering_mode;
+    }
+
+    @Override
     public void setAutoWhiteBalanceLock(boolean enabled) {
         camera_settings.wb_lock = enabled;
         camera_settings.setAutoWhiteBalanceLock(previewBuilder);
@@ -4713,6 +4733,55 @@ public class CameraController2 extends CameraController {
         return new CameraController.Face(camera2_face.getScore(), area_rect);
     }
 
+    private boolean setMeteringArea(List<Area> areas) {
+        // trigger default if metering is supported and mode is set to off
+        getMeteringAreas();
+
+        if (ae_metering_mode == AEMeteringMode.AEMETERING_OFF) {
+            camera_settings.ae_regions = null;
+            return false;
+        }
+
+        Rect sensor_rect = getViewableRect();
+
+        if (ae_metering_mode == AEMeteringMode.AEMETERING_AVERAGE) {
+            camera_settings.ae_regions = new MeteringRectangle[] {
+                new MeteringRectangle(sensor_rect, 1000)
+            };
+        } else {
+
+            if (ae_metering_mode == AEMeteringMode.AEMETERING_SPOT && areas != null && !areas.isEmpty()) {
+                camera_settings.ae_regions = new MeteringRectangle[areas.size()];
+                int i = 0;
+                for (Area a : areas) {
+                    camera_settings.ae_regions[i++] = convertAreaToMeteringRectangle(sensor_rect, a);
+                }
+            } else {
+
+                // prepare center area
+                // constant focus size based on function getAreas in class Preview
+                int focus_size = 50;
+                Rect rect = new Rect();
+                // center coord is 0,0
+                int coordx = 0, coordy = 0;
+                rect.left = (int)coordx - focus_size;
+                rect.right = (int)coordx + focus_size;
+                rect.top = (int)coordy - focus_size;
+                rect.bottom = (int)coordy + focus_size;
+                Area area = new Area(rect, 1000);
+                MeteringRectangle centerRect = convertAreaToMeteringRectangle(sensor_rect, area);
+
+                camera_settings.ae_regions = new MeteringRectangle[] {
+                    centerRect
+                };
+            }
+        }
+
+        camera_settings.setAERegions(previewBuilder);
+
+        return true;
+    }
+
     @Override
     public boolean setFocusAndMeteringArea(List<Area> areas) {
         Rect sensor_rect = getViewableRect();
@@ -4731,17 +4800,10 @@ public class CameraController2 extends CameraController {
         }
         else
             camera_settings.af_regions = null;
-        if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
-            has_metering = true;
-            camera_settings.ae_regions = new MeteringRectangle[areas.size()];
-            int i = 0;
-            for(CameraController.Area area : areas) {
-                camera_settings.ae_regions[i++] = convertAreaToMeteringRectangle(sensor_rect, area);
-            }
-            camera_settings.setAERegions(previewBuilder);
-        }
-        else
-            camera_settings.ae_regions = null;
+
+        // check for mode and set metering regions
+        has_metering = setMeteringArea(areas);
+
         if( has_focus || has_metering ) {
             try {
                 setRepeatingRequest();
@@ -4757,7 +4819,7 @@ public class CameraController2 extends CameraController {
         }
         return has_focus;
     }
-    
+
     @Override
     public void clearFocusAndMetering() {
         Rect sensor_rect = getViewableRect();
@@ -4777,14 +4839,8 @@ public class CameraController2 extends CameraController {
             }
             else
                 camera_settings.af_regions = null;
-            if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
-                has_metering = true;
-                camera_settings.ae_regions = new MeteringRectangle[1];
-                camera_settings.ae_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
-                camera_settings.setAERegions(previewBuilder);
-            }
-            else
-                camera_settings.ae_regions = null;
+
+            has_metering = setMeteringArea(null);
         }
         if( has_focus || has_metering ) {
             try {
