@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusMoveCallback;
 import android.location.Location;
@@ -1287,12 +1288,16 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void setAutoExposureMeteringMode(AEMeteringMode mode) {
-
+        ae_metering_mode = mode;
     }
 
     @Override
     public AEMeteringMode getAutoExposureMeteringMode() {
-        return AEMeteringMode.AEMETERING_OFF;
+        Camera.Parameters parameters = getParameters();
+        if (parameters.getMaxNumMeteringAreas() <= 0) {
+            return AEMeteringMode.AEMETERING_OFF;
+        }
+        return ae_metering_mode;
     }
 
     @Override
@@ -1358,36 +1363,67 @@ public class CameraController1 extends CameraController {
         for(CameraController.Area area : areas) {
             camera_areas.add(new Camera.Area(area.rect, area.weight));
         }
+        boolean has_focus = false;
+        boolean has_metering;
         try {
             Camera.Parameters parameters = this.getParameters();
             String focus_mode = parameters.getFocusMode();
             // getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
+
             if( parameters.getMaxNumFocusAreas() != 0 && focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
                 parameters.setFocusAreas(camera_areas);
-
-                // also set metering areas
-                if( parameters.getMaxNumMeteringAreas() == 0 ) {
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "metering areas not supported");
-                }
-                else {
-                    parameters.setMeteringAreas(camera_areas);
-                }
-
-                setCameraParameters(parameters);
-
-                return true;
+                has_focus = true;
             }
-            else if( parameters.getMaxNumMeteringAreas() != 0 ) {
-                parameters.setMeteringAreas(camera_areas);
 
+            Camera.Parameters[] paramRef = new Camera.Parameters[] {parameters};
+            has_metering = setMeteringArea(camera_areas, paramRef);
+
+            if (has_focus || has_metering) {
                 setCameraParameters(parameters);
             }
         }
         catch(RuntimeException e) {
             e.printStackTrace();
         }
-        return false;
+        return has_focus;
+    }
+
+    private boolean setMeteringArea(List<Camera.Area> camera_areas, Camera.Parameters[] parameters) {
+        if (parameters == null || parameters.length < 1) {
+            return false;
+        }
+
+        AEMeteringMode aeMeteringMode = getAutoExposureMeteringMode();
+
+        if (aeMeteringMode == AEMeteringMode.AEMETERING_AVERAGE) {
+            ArrayList<Camera.Area> tmpAreas = new ArrayList<>();
+            tmpAreas.add(new Camera.Area(new Rect(-1000, -1000, 1000, 1000), 1000));
+            parameters[0].setMeteringAreas(tmpAreas);
+        } else {
+
+            if (aeMeteringMode == AEMeteringMode.AEMETERING_SPOT && camera_areas != null && !camera_areas.isEmpty()) {
+                parameters[0].setMeteringAreas(camera_areas);
+            } else {
+
+                // prepare center area
+                // constant focus size based on function getAreas in class Preview
+                int focus_size = 50;
+                Rect rect = new Rect();
+                // center coord is 0,0
+                int coordx = 0, coordy = 0;
+                rect.left = (int)coordx - focus_size;
+                rect.right = (int)coordx + focus_size;
+                rect.top = (int)coordy - focus_size;
+                rect.bottom = (int)coordy + focus_size;
+                Camera.Area centerArea = new Camera.Area(rect, 1000);
+
+                ArrayList<Camera.Area> tmpAreas = new ArrayList<>();
+                tmpAreas.add(centerArea);
+                parameters[0].setMeteringAreas(tmpAreas);
+            }
+        }
+
+        return true;
     }
 
     public void clearFocusAndMetering() {
@@ -1398,8 +1434,8 @@ public class CameraController1 extends CameraController {
                 parameters.setFocusAreas(null);
                 update_parameters = true;
             }
-            if( parameters.getMaxNumMeteringAreas() > 0 ) {
-                parameters.setMeteringAreas(null);
+            Camera.Parameters[] paramsRef = new Camera.Parameters[] {parameters};
+            if( setMeteringArea(null, paramsRef) ) {
                 update_parameters = true;
             }
             if( update_parameters ) {
