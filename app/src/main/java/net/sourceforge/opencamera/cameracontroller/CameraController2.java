@@ -2,6 +2,9 @@ package net.sourceforge.opencamera.cameracontroller;
 
 import net.sourceforge.opencamera.MyDebug;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1774,6 +1777,22 @@ public class CameraController2 extends CameraController {
                         if( MyDebug.LOG )
                             Log.d(TAG, "try to get camera characteristics");
                         characteristics = manager.getCameraCharacteristics(cameraIdS);
+
+                        File f = new File("/sdcard/opencamera backup/camera2_parameters.txt");
+                        if (!f.exists()) {
+                            StringBuilder sb = new StringBuilder();
+                            for (CameraCharacteristics.Key key : characteristics.getKeys()) {
+                                sb.append(key.toString()).append("\n");
+                            }
+                            try {
+                                FileOutputStream fos = new FileOutputStream(f);
+                                fos.write(sb.toString().getBytes());
+                                fos.close();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
                         if( MyDebug.LOG )
                             Log.d(TAG, "successfully obtained camera characteristics");
                         // now read cached values
@@ -4769,6 +4788,17 @@ public class CameraController2 extends CameraController {
                 };
             }
         }
+
+        StringBuilder regions = new StringBuilder();
+        if (camera_settings.ae_regions != null) {
+            for (int i = 0; i < camera_settings.ae_regions.length; i++) {
+                MeteringRectangle reg = camera_settings.ae_regions[i];
+                regions.append("{").append(reg.getX()).append(",").append(reg.getY()).append(",")
+                    .append(reg.getWidth()).append(",").append(reg.getHeight()).append(",")
+                    .append(reg.getMeteringWeight()).append("},");
+            }
+        }
+        Log.d(TAG, "ae_metering_mode " + ae_metering_mode + " ae_regions " + regions.toString());
 
         camera_settings.setAERegions(previewBuilder);
 
