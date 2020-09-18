@@ -263,7 +263,7 @@ public class CameraController2 extends CameraController {
     private float capture_result_focus_distance_min;
     private float capture_result_focus_distance_max;*/
     private final static long max_preview_exposure_time_c = 1000000000L/12;
-    private AEMeteringMode ae_metering_mode = AEMeteringMode.AEMETERING_OFF;
+    private AEMeteringMode ae_metering_mode = AEMeteringMode.AEMETERING_AVERAGE;
 
     private enum RequestTagType {
         CAPTURE, // request is either for a regular non-burst capture, or the last of a burst capture sequence
@@ -4583,13 +4583,8 @@ public class CameraController2 extends CameraController {
 
     @Override
     public AEMeteringMode getAutoExposureMeteringMode() {
-        if (characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0) {
-            // if supported, set default to average
-            if (ae_metering_mode == AEMeteringMode.AEMETERING_OFF) {
-                ae_metering_mode = AEMeteringMode.AEMETERING_AVERAGE;
-            }
-        } else {
-            ae_metering_mode = AEMeteringMode.AEMETERING_OFF;
+        if (characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) <= 0) {
+            return AEMeteringMode.AEMETERING_OFF;
         }
         return ae_metering_mode;
     }
@@ -4734,23 +4729,21 @@ public class CameraController2 extends CameraController {
     }
 
     private boolean setMeteringArea(List<Area> areas) {
-        // trigger default if metering is supported and mode is set to off
-        getMeteringAreas();
-
-        if (ae_metering_mode == AEMeteringMode.AEMETERING_OFF) {
+        AEMeteringMode aeMeteringMode = getAutoExposureMeteringMode();
+        if (aeMeteringMode == AEMeteringMode.AEMETERING_OFF) {
             camera_settings.ae_regions = null;
             return false;
         }
 
         Rect sensor_rect = getViewableRect();
 
-        if (ae_metering_mode == AEMeteringMode.AEMETERING_AVERAGE) {
+        if (aeMeteringMode == AEMeteringMode.AEMETERING_AVERAGE) {
             camera_settings.ae_regions = new MeteringRectangle[] {
                 new MeteringRectangle(sensor_rect, 1000)
             };
         } else {
 
-            if (ae_metering_mode == AEMeteringMode.AEMETERING_SPOT && areas != null && !areas.isEmpty()) {
+            if (aeMeteringMode == AEMeteringMode.AEMETERING_SPOT && areas != null && !areas.isEmpty()) {
                 camera_settings.ae_regions = new MeteringRectangle[areas.size()];
                 int i = 0;
                 for (Area a : areas) {

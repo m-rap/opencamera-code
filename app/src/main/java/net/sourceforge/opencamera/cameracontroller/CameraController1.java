@@ -47,6 +47,7 @@ public class CameraController1 extends CameraController {
     private int current_exposure_compensation;
     private int picture_width;
     private int picture_height;
+    private AEMeteringMode ae_metering_mode = AEMeteringMode.AEMETERING_AVERAGE;
 
     /** Opens the camera device.
      * @param cameraId Which camera to open (must be between 0 and CameraControllerManager1.getNumberOfCameras()-1).
