@@ -2727,6 +2727,8 @@ public class CameraController2 extends CameraController {
         SizeF view_angle = CameraControllerManager2.computeViewAngles(characteristics);
         camera_features.view_angle_x = view_angle.getWidth();
         camera_features.view_angle_y = view_angle.getHeight();
+        
+        camera_features.supports_ae_metering = getAutoExposureMeteringMode() != AEMeteringMode.AEMETERING_OFF;
 
         return camera_features;
     }
@@ -4577,8 +4579,11 @@ public class CameraController2 extends CameraController {
 
     @Override
     public void setAutoExposureMeteringMode(AEMeteringMode mode) {
-        ae_metering_mode = mode;
-        clearFocusAndMetering();
+        if (characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) <= 0) {
+            ae_metering_mode = AEMeteringMode.AEMETERING_OFF;
+        } else {
+            ae_metering_mode = mode;
+        }
     }
 
     @Override

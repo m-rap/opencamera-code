@@ -49,6 +49,7 @@ public class CameraController1 extends CameraController {
     private int picture_width;
     private int picture_height;
     private AEMeteringMode ae_metering_mode = AEMeteringMode.AEMETERING_AVERAGE;
+    private boolean metering_without_regions = false;
 
     /** Opens the camera device.
      * @param cameraId Which camera to open (must be between 0 and CameraControllerManager1.getNumberOfCameras()-1).
@@ -418,6 +419,8 @@ public class CameraController1 extends CameraController {
             camera_features.view_angle_x = default_view_angle_x;
             camera_features.view_angle_y = default_view_angle_y;
         }
+
+        camera_features.supports_ae_metering = getAutoExposureMeteringMode() != AEMeteringMode.AEMETERING_OFF;
 
         return camera_features;
     }
@@ -1288,7 +1291,12 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void setAutoExposureMeteringMode(AEMeteringMode mode) {
-        ae_metering_mode = mode;
+        Camera.Parameters parameters = getParameters();
+        if (parameters.getMaxNumMeteringAreas() <= 0) {
+            ae_metering_mode = mode;
+        } else {
+            ae_metering_mode = mode;
+        }
     }
 
     @Override
@@ -1394,6 +1402,11 @@ public class CameraController1 extends CameraController {
         }
 
         AEMeteringMode aeMeteringMode = getAutoExposureMeteringMode();
+
+        if (aeMeteringMode == AEMeteringMode.AEMETERING_OFF) {
+            parameters[0].setMeteringAreas(new ArrayList<Camera.Area>());
+            return false;
+        }
 
         if (aeMeteringMode == AEMeteringMode.AEMETERING_AVERAGE) {
             ArrayList<Camera.Area> tmpAreas = new ArrayList<>();

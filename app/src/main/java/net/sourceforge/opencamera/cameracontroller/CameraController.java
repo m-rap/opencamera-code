@@ -97,6 +97,7 @@ public abstract class CameraController {
         public boolean supports_raw;
         public float view_angle_x; // horizontal angle of view in degrees (when unzoomed)
         public float view_angle_y; // vertical angle of view in degrees (when unzoomed)
+        public boolean supports_ae_metering;
 
         /** Returns whether any of the supplied sizes support the requested fps.
          */

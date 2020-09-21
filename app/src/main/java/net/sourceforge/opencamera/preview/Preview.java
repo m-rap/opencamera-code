@@ -124,6 +124,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private RefreshPreviewBitmapTask refreshPreviewBitmapTask;
 
     private boolean want_histogram; // whether to generate a histogram, requires want_preview_bitmap==true
+
     public enum HistogramType {
         HISTOGRAM_TYPE_RGB,
         HISTOGRAM_TYPE_LUMINANCE,
@@ -283,6 +284,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private boolean supports_raw;
     private float view_angle_x;
     private float view_angle_y;
+    private boolean supports_ae_metering;
 
     private List<CameraController.Size> supported_preview_sizes;
 
@@ -1389,6 +1391,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         exposure_step = 0.0f;
         supports_expo_bracketing = false;
         max_expo_bracketing_n_images = 0;
+        supports_ae_metering = false;
         supports_focus_bracketing = false;
         supports_burst = false;
         supports_raw = false;
@@ -2101,6 +2104,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             this.video_quality_handler.setVideoSizes(camera_features.video_sizes);
             this.video_quality_handler.setVideoSizesHighSpeed(camera_features.video_sizes_high_speed);
             this.supported_preview_sizes = camera_features.preview_sizes;
+            this.supports_ae_metering = camera_features.supports_ae_metering;
         }
     }
 
@@ -3996,6 +4000,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 showToast(getExposureCompensationString(new_exposure), 0, true);
             }
         }
+    }
+
+    public void setAEMeteringMode(CameraController.AEMeteringMode ae_metering_mode) {
+        if (camera_controller != null) {
+            camera_controller.setAutoExposureMeteringMode(ae_metering_mode);
+        }
+    }
+
+    public CameraController.AEMeteringMode getAEMeteringMode() {
+        if (camera_controller != null) {
+            return camera_controller.getAutoExposureMeteringMode();
+        }
+        return CameraController.AEMeteringMode.AEMETERING_OFF;
     }
 
     /** Set a manual white balance temperature. The white balance mode must be set to "manual" for
@@ -6861,6 +6878,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             return 0;
         }
         return camera_controller.getExposureCompensation();
+    }
+
+    /** Returns whether supports metering mode: average, spot, or center
+     */
+    public boolean supportsAEMetering() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "supportsAEMetering");
+        return this.supports_ae_metering;
     }
 
     /*List<String> getSupportedExposures() {
