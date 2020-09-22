@@ -2016,16 +2016,7 @@ public class MainUI {
             metering_spot.setOnClickListener(meteringOnClickListener);
             metering_center.setOnClickListener(meteringOnClickListener);
 
-            // initial set button alpha for last active mode
-            String last_metering = sharedPreferences.getString(PreferenceKeys.AEMeteringModeKey, "metering_off");
-            Preview pr = main_activity.getPreview();
-            if (last_metering.equals("metering_avg")) {
-                pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_AVERAGE);
-            } else if (last_metering.equals("metering_spot")) {
-                pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_SPOT);
-            } else if (last_metering.equals("metering_center")) {
-                pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_CENTER);
-            }
+            // initial set button alpha for current active mode
             meteringOnClickListener.onClick(null);
 
         } else {

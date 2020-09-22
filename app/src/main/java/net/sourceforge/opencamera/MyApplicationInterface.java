@@ -2747,6 +2747,36 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         editor.apply();
     }
 
+    @Override
+    public CameraController.AEMeteringMode getAutoExposureMeteringMode() {
+        String last_metering = sharedPreferences.getString(PreferenceKeys.AEMeteringModeKey, "metering_off");
+        if (last_metering.equals("metering_avg")) {
+            return CameraController.AEMeteringMode.AEMETERING_AVERAGE;
+        } else if (last_metering.equals("metering_spot")) {
+            return CameraController.AEMeteringMode.AEMETERING_SPOT;
+        } else if (last_metering.equals("metering_center")) {
+            return CameraController.AEMeteringMode.AEMETERING_CENTER;
+        }
+        return CameraController.AEMeteringMode.AEMETERING_OFF;
+    }
+
+    @Override
+    public void setAutoExposureMeteringMode(CameraController.AEMeteringMode ae_metering_mode) {
+        String new_metering;
+        if (ae_metering_mode == CameraController.AEMeteringMode.AEMETERING_AVERAGE) {
+            new_metering = "metering_avg";
+        } else if (ae_metering_mode == CameraController.AEMeteringMode.AEMETERING_SPOT) {
+            new_metering = "metering_spot";
+        } else if (ae_metering_mode == CameraController.AEMeteringMode.AEMETERING_CENTER) {
+            new_metering = "metering_center";
+        } else {
+            new_metering = "metering_off";
+        }
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(PreferenceKeys.AEMeteringModeKey, new_metering);
+        editor.apply();
+    }
+
     private int getStampFontColor() {
         String color = sharedPreferences.getString(PreferenceKeys.StampFontColorPreferenceKey, "#ffffff");
         return Color.parseColor(color);

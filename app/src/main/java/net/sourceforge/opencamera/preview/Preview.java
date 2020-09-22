@@ -2567,6 +2567,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             Log.d(TAG, "setupCameraParameters: time after exposures: " + (System.currentTimeMillis() - debug_time));
         }
 
+        if (supports_ae_metering) {
+            CameraController.AEMeteringMode metering_mode = applicationInterface.getAutoExposureMeteringMode();
+            camera_controller.setAutoExposureMeteringMode(metering_mode);
+            applicationInterface.setAutoExposureMeteringMode(camera_controller.getAutoExposureMeteringMode());
+        }
+
         if( supported_apertures != null ) {
             // set up aperture
             float aperture = applicationInterface.getAperturePref();

@@ -1291,9 +1291,8 @@ public class CameraController1 extends CameraController {
 
     @Override
     public void setAutoExposureMeteringMode(AEMeteringMode mode) {
-        Camera.Parameters parameters = getParameters();
-        if (parameters.getMaxNumMeteringAreas() <= 0) {
-            ae_metering_mode = mode;
+        if (mode == AEMeteringMode.AEMETERING_OFF) {
+            ae_metering_mode = AEMeteringMode.AEMETERING_AVERAGE;
         } else {
             ae_metering_mode = mode;
         }

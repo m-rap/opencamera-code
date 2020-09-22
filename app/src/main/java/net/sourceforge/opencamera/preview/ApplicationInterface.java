@@ -226,6 +226,8 @@ public interface ApplicationInterface {
     void setExposureTimePref(long exposure_time);
     void clearExposureTimePref();
     void setFocusDistancePref(float focus_distance, boolean is_target_distance);
+    CameraController.AEMeteringMode getAutoExposureMeteringMode();
+    void setAutoExposureMeteringMode(CameraController.AEMeteringMode ae_metering_mode);
 
     // callbacks
     void onDrawPreview(Canvas canvas);
