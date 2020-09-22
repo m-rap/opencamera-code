@@ -264,6 +264,7 @@ public class CameraController2 extends CameraController {
     private float capture_result_focus_distance_max;*/
     private final static long max_preview_exposure_time_c = 1000000000L/12;
     private AEMeteringMode ae_metering_mode = AEMeteringMode.AEMETERING_AVERAGE;
+    private List<Area> current_areas = new ArrayList<>();
 
     private enum RequestTagType {
         CAPTURE, // request is either for a regular non-burst capture, or the last of a burst capture sequence
@@ -4584,6 +4585,7 @@ public class CameraController2 extends CameraController {
         } else {
             ae_metering_mode = mode;
         }
+        refreshFocusAndMeteringArea();
     }
 
     @Override
@@ -4780,8 +4782,19 @@ public class CameraController2 extends CameraController {
         return true;
     }
 
+    public boolean refreshFocusAndMeteringArea() {
+        if (current_areas.size() == 0) {
+            clearFocusAndMetering();
+            return true;
+        }
+        return setFocusAndMeteringArea(current_areas);
+    }
+
     @Override
     public boolean setFocusAndMeteringArea(List<Area> areas) {
+        current_areas = areas;
+        if (areas.size() == 0)
+            return false;
         Rect sensor_rect = getViewableRect();
         if( MyDebug.LOG )
             Log.d(TAG, "sensor_rect: " + sensor_rect.left + " , " + sensor_rect.top + " x " + sensor_rect.right + " , " + sensor_rect.bottom);

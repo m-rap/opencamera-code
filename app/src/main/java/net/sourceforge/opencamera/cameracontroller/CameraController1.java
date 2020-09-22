@@ -1368,6 +1368,10 @@ public class CameraController1 extends CameraController {
     }
 
     public boolean refreshFocusAndMeteringArea() {
+        if (current_areas.size() == 0) {
+            clearFocusAndMetering();
+            return true;
+        }
         return setFocusAndMeteringArea(current_areas);
     }
 
