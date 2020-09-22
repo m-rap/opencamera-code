@@ -49,7 +49,8 @@ public class CameraController1 extends CameraController {
     private int picture_width;
     private int picture_height;
     private AEMeteringMode ae_metering_mode = AEMeteringMode.AEMETERING_AVERAGE;
-    private boolean metering_without_regions = false;
+    private boolean contain_metering_params = false;
+    private List<Area> current_areas = new ArrayList<>();
 
     /** Opens the camera device.
      * @param cameraId Which camera to open (must be between 0 and CameraControllerManager1.getNumberOfCameras()-1).
@@ -1296,6 +1297,7 @@ public class CameraController1 extends CameraController {
         } else {
             ae_metering_mode = mode;
         }
+        refreshFocusAndMeteringArea();
     }
 
     @Override
@@ -1365,7 +1367,12 @@ public class CameraController1 extends CameraController {
         sounds_enabled = enabled;
     }
 
+    public boolean refreshFocusAndMeteringArea() {
+        return setFocusAndMeteringArea(current_areas);
+    }
+
     public boolean setFocusAndMeteringArea(List<CameraController.Area> areas) {
+        this.current_areas = areas;
         List<Camera.Area> camera_areas = new ArrayList<>();
         for(CameraController.Area area : areas) {
             camera_areas.add(new Camera.Area(area.rect, area.weight));
@@ -1402,6 +1409,12 @@ public class CameraController1 extends CameraController {
 
         AEMeteringMode aeMeteringMode = getAutoExposureMeteringMode();
 
+        String supportedMeteringValues = parameters[0].get("auto-exposure-values");
+        String[] supportedMeteringValuesArr = new String[0];
+        if (supportedMeteringValues != null && !supportedMeteringValues.isEmpty()) {
+            supportedMeteringValuesArr = supportedMeteringValues.split(",");
+        }
+
         if (aeMeteringMode == AEMeteringMode.AEMETERING_OFF) {
             parameters[0].setMeteringAreas(new ArrayList<Camera.Area>());
             return false;
@@ -1411,10 +1424,49 @@ public class CameraController1 extends CameraController {
             ArrayList<Camera.Area> tmpAreas = new ArrayList<>();
             tmpAreas.add(new Camera.Area(new Rect(-1000, -1000, 1000, 1000), 1000));
             parameters[0].setMeteringAreas(tmpAreas);
+            if (supportedMeteringValuesArr.length > 0 && supportedMeteringValues.contains("frame-average")) {
+                parameters[0].set("auto-exposure", "frame-average");
+            }
         } else {
 
+            if (aeMeteringMode == AEMeteringMode.AEMETERING_SPOT) {
+                if (supportedMeteringValuesArr.length > 0 && supportedMeteringValues.contains("spot-metering")) {
+                    //if (supportedMeteringValues.contains("spot-metering-adv")) {
+                    //    // toggle adv & not adv
+                    //    String tmp = parameters[0].get("auto-exposure");
+                    //    if (tmp != null && tmp.equals("spot-metering")) {
+                    //        parameters[0].set("auto-exposure", "spot-metering-adv");
+                    //        Log.d(TAG, "adv");
+                    //    } else {
+                    //        parameters[0].set("auto-exposure", "spot-metering");
+                    //        Log.d(TAG, "not adv");
+                    //    }
+                    //} else {
+                        parameters[0].set("auto-exposure", "spot-metering");
+                    //}
+                }
+            } else if (aeMeteringMode == AEMeteringMode.AEMETERING_CENTER) {
+                if (supportedMeteringValuesArr.length > 0 && supportedMeteringValues.contains("center-weighted")) {
+                    //if (supportedMeteringValues.contains("center-weighted-adv")) {
+                    //    // toggle adv & not adv
+                    //    String tmp = parameters[0].get("auto-exposure");
+                    //    if (tmp != null && tmp.equals("center-weighted")) {
+                    //        parameters[0].set("auto-exposure", "center-weighted-adv");
+                    //        Log.d(TAG, "adv");
+                    //    } else {
+                    //        parameters[0].set("auto-exposure", "center-weighted");
+                    //        Log.d(TAG, "not adv");
+                    //    }
+                    //} else {
+                        parameters[0].set("auto-exposure", "center-weighted");
+                    //}
+                }
+            }
+
             if (aeMeteringMode == AEMeteringMode.AEMETERING_SPOT && camera_areas != null && !camera_areas.isEmpty()) {
+
                 parameters[0].setMeteringAreas(camera_areas);
+
             } else {
 
                 // prepare center area
