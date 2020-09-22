@@ -4976,6 +4976,33 @@ public class CameraController2 extends CameraController {
                 }
                 else {
                     captureSession.setRepeatingRequest(request, previewCaptureCallback, handler);
+
+                    try {
+                        MeteringRectangle[] areas = request.get(CaptureRequest.CONTROL_AE_REGIONS);
+                        MeteringRectangle[] fareas = request.get(CaptureRequest.CONTROL_AF_REGIONS);
+
+                        if (areas != null) {
+                            StringBuilder sb = new StringBuilder("api2: ae area ");
+                            for (MeteringRectangle a : areas) {
+                                Rect r = a.getRect();
+                                int w = a.getMeteringWeight();
+                                sb.append("{").append(r.top).append(",").append(r.right).append(",").append(r.bottom)
+                                        .append(",").append(r.left).append(",").append(w).append("}");
+                            }
+                            Log.d(TAG, sb.toString());
+                        }
+
+                        if (fareas != null) {
+                            StringBuilder sb = new StringBuilder("api2: af area ");
+                            for (MeteringRectangle a : fareas) {
+                                Rect r = a.getRect();
+                                int w = a.getMeteringWeight();
+                                sb.append("{").append(r.top).append(",").append(r.right).append(",").append(r.bottom)
+                                        .append(",").append(r.left).append(",").append(w).append("}");
+                            }
+                            Log.d(TAG, sb.toString());
+                        }
+                    } catch (Exception e) { }
                 }
                 if( MyDebug.LOG )
                     Log.d(TAG, "setRepeatingRequest done");

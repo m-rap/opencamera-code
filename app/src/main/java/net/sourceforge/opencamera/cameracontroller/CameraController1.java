@@ -157,6 +157,33 @@ public class CameraController1 extends CameraController {
             camera.setParameters(parameters);
             if( MyDebug.LOG )
                 Log.d(TAG, "done");
+
+            try {
+                List<Camera.Area> areas = camera.getParameters().getMeteringAreas();
+                List<Camera.Area> fareas = camera.getParameters().getFocusAreas();
+
+                if (areas != null) {
+                    StringBuilder sb = new StringBuilder("api1: ae area ");
+                    for (Camera.Area a : areas) {
+                        Rect r = a.rect;
+                        int w = a.weight;
+                        sb.append("{").append(r.top).append(",").append(r.right).append(",").append(r.bottom)
+                                .append(",").append(r.left).append(",").append(w).append("}");
+                    }
+                    Log.d(TAG, sb.toString());
+                }
+
+                if (fareas != null) {
+                    StringBuilder sb = new StringBuilder("api1: af area ");
+                    for (Camera.Area a : fareas) {
+                        Rect r = a.rect;
+                        int w = a.weight;
+                        sb.append("{").append(r.top).append(",").append(r.right).append(",").append(r.bottom)
+                                .append(",").append(r.left).append(",").append(w).append("}");
+                    }
+                    Log.d(TAG, sb.toString());
+                }
+            } catch (Exception e) { }
         }
         catch(RuntimeException e) {
             // just in case something has gone wrong
