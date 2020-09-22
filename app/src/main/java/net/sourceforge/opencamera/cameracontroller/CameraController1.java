@@ -1443,6 +1443,7 @@ public class CameraController1 extends CameraController {
                     //    }
                     //} else {
                         parameters[0].set("auto-exposure", "spot-metering");
+                        //parameters[0].set("auto-exposure", "user-metering");
                     //}
                 }
             } else if (aeMeteringMode == AEMeteringMode.AEMETERING_CENTER) {
