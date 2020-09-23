@@ -1428,43 +1428,27 @@ public class CameraController1 extends CameraController {
             ArrayList<Camera.Area> tmpAreas = new ArrayList<>();
             tmpAreas.add(new Camera.Area(new Rect(-1000, -1000, 1000, 1000), 1000));
             parameters[0].setMeteringAreas(tmpAreas);
+
             if (supportedMeteringValuesArr.length > 0 && supportedMeteringValues.contains("frame-average")) {
                 parameters[0].set("auto-exposure", "frame-average");
             }
+
         } else {
 
             if (aeMeteringMode == AEMeteringMode.AEMETERING_SPOT) {
                 if (supportedMeteringValuesArr.length > 0 && supportedMeteringValues.contains("spot-metering")) {
-                    //if (supportedMeteringValues.contains("spot-metering-adv")) {
-                    //    // toggle adv & not adv
-                    //    String tmp = parameters[0].get("auto-exposure");
-                    //    if (tmp != null && tmp.equals("spot-metering")) {
-                    //        parameters[0].set("auto-exposure", "spot-metering-adv");
-                    //        Log.d(TAG, "adv");
-                    //    } else {
-                    //        parameters[0].set("auto-exposure", "spot-metering");
-                    //        Log.d(TAG, "not adv");
-                    //    }
-                    //} else {
-                        parameters[0].set("auto-exposure", "spot-metering");
-                        //parameters[0].set("auto-exposure", "user-metering");
-                    //}
+                    // on Mi A1 spot-metering much more like center-metering, I expect region selected by user
+                    //parameters[0].set("auto-exposure", "spot-metering");
+                    //parameters[0].set("auto-exposure", "spot-metering-adv");
+                    //parameters[0].set("auto-exposure", "user-metering");
+                    //parameters[0].set("auto-exposure", "center-weighted-adv");
+                    //parameters[0].set("auto-exposure", "center-weighted");
+                    //parameters[0].set("auto-exposure", "frame-average");
                 }
             } else if (aeMeteringMode == AEMeteringMode.AEMETERING_CENTER) {
                 if (supportedMeteringValuesArr.length > 0 && supportedMeteringValues.contains("center-weighted")) {
-                    //if (supportedMeteringValues.contains("center-weighted-adv")) {
-                    //    // toggle adv & not adv
-                    //    String tmp = parameters[0].get("auto-exposure");
-                    //    if (tmp != null && tmp.equals("center-weighted")) {
-                    //        parameters[0].set("auto-exposure", "center-weighted-adv");
-                    //        Log.d(TAG, "adv");
-                    //    } else {
-                    //        parameters[0].set("auto-exposure", "center-weighted");
-                    //        Log.d(TAG, "not adv");
-                    //    }
-                    //} else {
-                        parameters[0].set("auto-exposure", "center-weighted");
-                    //}
+                    parameters[0].set("auto-exposure", "center-weighted");
+                    //parameters[0].set("auto-exposure", "spot-metering");
                 }
             }
 
