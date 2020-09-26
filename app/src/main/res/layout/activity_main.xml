@@ -650,6 +650,59 @@
 
     </LinearLayout>
 
+    <ImageButton
+        android:id="@+id/metering_button"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:background="@color/icons_background"
+        android:src="@drawable/ic_metering_avg"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:onClick="clickedMetering" />
+
+    <RelativeLayout
+        android:id="@+id/metering_container_outside"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@color/seekbar_background"
+        android:visibility="gone"
+        >
+        <TextView
+            android:id="@+id/metering_title_outside"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="METERING:"
+            android:alpha="1.0" />
+        <ImageView
+            android:id="@+id/metering_avg_outside"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:alpha="0.6"
+            android:layout_toRightOf="@id/metering_title_outside"
+            android:layout_marginLeft="20dp"
+            android:background="@drawable/ic_metering_avg" />
+        <ImageView
+            android:id="@+id/metering_touch_outside"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:alpha="0.6"
+            android:layout_toRightOf="@id/metering_avg_outside"
+            android:layout_alignTop="@id/metering_avg_outside"
+            android:layout_marginLeft="20dp"
+            android:background="@drawable/ic_metering_touch" />
+        <ImageView
+            android:id="@+id/metering_center_outside"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:alpha="0.6"
+            android:layout_toRightOf="@id/metering_touch_outside"
+            android:layout_alignTop="@id/metering_avg_outside"
+            android:layout_marginLeft="20dp"
+            android:background="@drawable/ic_metering_center" />
+    </RelativeLayout>
+
     <FrameLayout
         android:id="@+id/locker"
         android:layout_width="match_parent"

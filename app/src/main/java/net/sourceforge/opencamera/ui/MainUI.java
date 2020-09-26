@@ -59,6 +59,7 @@ public class MainUI {
     private boolean force_destroy_popup = false; // if true, then the popup isn't cached for only the next time the popup is closed
 
     private int current_orientation;
+
     enum UIPlacement {
         UIPLACEMENT_RIGHT,
         UIPLACEMENT_LEFT,
@@ -319,6 +320,7 @@ public class MainUI {
             buttons_permanent.add(main_activity.findViewById(R.id.settings));
             buttons_permanent.add(main_activity.findViewById(R.id.popup));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure));
+            buttons_permanent.add(main_activity.findViewById(R.id.metering_button));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure_lock));
@@ -575,22 +577,26 @@ public class MainUI {
             int width_pixels = (int) (width_dp * scale + 0.5f); // convert dps to pixels
             int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
 
-            View view = main_activity.findViewById(R.id.sliders_container);
-            setViewRotation(view, ui_rotation);
-            view.setTranslationX(0.0f);
-            view.setTranslationY(0.0f);
+            View[] views = new View[] {
+                    main_activity.findViewById(R.id.sliders_container),
+                    main_activity.findViewById(R.id.metering_container_outside)
+            };
 
-            if( ui_rotation == 90 || ui_rotation == 270 ) {
-                // portrait
-                view.setTranslationX(2*height_pixels);
-            }
-            else if( ui_rotation == 0 ) {
-                // landscape
-                view.setTranslationY(height_pixels);
-            }
-            else {
-                // upside-down landscape
-                view.setTranslationY(-1*height_pixels);
+            for (View view : views) {
+                setViewRotation(view, ui_rotation);
+                view.setTranslationX(0.0f);
+                view.setTranslationY(0.0f);
+
+                if (ui_rotation == 90 || ui_rotation == 270) {
+                    // portrait
+                    view.setTranslationX(2 * height_pixels);
+                } else if (ui_rotation == 0) {
+                    // landscape
+                    view.setTranslationY(height_pixels);
+                } else {
+                    // upside-down landscape
+                    view.setTranslationY(-1 * height_pixels);
+                }
             }
 
             /*
@@ -645,8 +651,9 @@ public class MainUI {
             }
             view.setLayoutParams(lp);*/
 
+            View view = views[0];
             view = main_activity.findViewById(R.id.exposure_seekbar);
-            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) view.getLayoutParams();
             lp.width = width_pixels;
             lp.height = height_pixels;
             view.setLayoutParams(lp);
@@ -655,19 +662,19 @@ public class MainUI {
             view.setAlpha(0.5f);
 
             view = main_activity.findViewById(R.id.iso_seekbar);
-            lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+            lp = (RelativeLayout.LayoutParams) view.getLayoutParams();
             lp.width = width_pixels;
             lp.height = height_pixels;
             view.setLayoutParams(lp);
 
             view = main_activity.findViewById(R.id.exposure_time_seekbar);
-            lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+            lp = (RelativeLayout.LayoutParams) view.getLayoutParams();
             lp.width = width_pixels;
             lp.height = height_pixels;
             view.setLayoutParams(lp);
 
             view = main_activity.findViewById(R.id.white_balance_seekbar);
-            lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+            lp = (RelativeLayout.LayoutParams) view.getLayoutParams();
             lp.width = width_pixels;
             lp.height = height_pixels;
             view.setLayoutParams(lp);
@@ -1388,6 +1395,34 @@ public class MainUI {
                 initRemoteControlForExposureUI();
             }
         }
+    }
+
+    /**
+     * Opens or close metering settings
+     */
+    public void toggleMeteringUI() {
+        closePopup();
+        closeExposureUI();
+        if (isMeteringUIOpen()) {
+            closeMeteringUI();
+        } else if (main_activity.getPreview().getCameraController() != null) {
+            setupMeteringUI();
+        }
+    }
+
+    private boolean isMeteringUIOpen() {
+        View view = main_activity.findViewById(R.id.metering_container_outside);
+        return view.getVisibility() == View.VISIBLE;
+    }
+
+    public void closeMeteringUI() {
+        View view = main_activity.findViewById(R.id.metering_container_outside);
+        view.setVisibility(View.GONE);
+    }
+
+    private void setupMeteringUI() {
+        View view = main_activity.findViewById(R.id.metering_container_outside);
+        view.setVisibility(View.VISIBLE);
     }
 
     private void initRemoteControlForExposureUI() {

@@ -1856,6 +1856,10 @@ public class MainActivity extends Activity {
         mainUI.toggleExposureUI();
     }
 
+    public void clickedMetering(View view) {
+        mainUI.toggleMeteringUI();
+    }
+
     public void clickedSettings(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSettings");
@@ -2557,6 +2561,11 @@ public class MainActivity extends Activity {
             // also handle the multi-cam icon here, as this can change when switching between front/back cameras
             // (e.g., if say a device only has multiple back cameras)
             View button = findViewById(R.id.switch_multi_camera);
+            changed = changed || (button.getVisibility() != View.GONE);
+            button.setVisibility(View.GONE);
+        }
+        if (!preview.supportsAEMetering()) {
+            View button = findViewById(R.id.metering_button);
             changed = changed || (button.getVisibility() != View.GONE);
             button.setVisibility(View.GONE);
         }
