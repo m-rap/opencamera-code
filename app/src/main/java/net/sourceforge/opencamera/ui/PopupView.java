@@ -118,28 +118,7 @@ public class PopupView extends LinearLayout {
             Log.d(TAG, "PopupView time 2: " + (System.nanoTime() - debug_time));
         if( !main_activity.getMainUI().showCycleFlashIcon() )
         {
-            List<String> supported_flash_values = preview.getSupportedFlashValues();
-            if( preview.isVideo() && supported_flash_values != null ) {
-                // filter flash modes we don't want to show
-                List<String> filter = new ArrayList<>();
-                for(String flash_value : supported_flash_values) {
-                    if( Preview.isFlashSupportedForVideo(flash_value) )
-                        filter.add(flash_value);
-                }
-                supported_flash_values = filter;
-            }
-            if( supported_flash_values != null && supported_flash_values.size() > 1 ) { // no point showing flash options if only one available!
-                addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), 0, "TEST_FLASH", new ButtonOptionsPopupListener() {
-                    @Override
-                    public void onClick(String option) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "clicked flash: " + option);
-                        preview.updateFlash(option);
-                        main_activity.getMainUI().setPopupIcon();
-                        main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
-                    }
-                });
-            }
+            setupFlashPane(main_activity, this, total_width_dp);
         }
         if( MyDebug.LOG )
             Log.d(TAG, "PopupView time 3: " + (System.nanoTime() - debug_time));
@@ -149,32 +128,10 @@ public class PopupView extends LinearLayout {
             // don't add any more options
         }
         else {
-            // make a copy of getSupportedFocusValues() so we can modify it
-            List<String> supported_focus_values = preview.getSupportedFocusValues();
             MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
-            if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
-                // don't show focus modes in focus bracketing mode (as we'll always run in manual focus mode)
-                supported_focus_values = null;
-            }
-            if( supported_focus_values != null ) {
-                supported_focus_values = new ArrayList<>(supported_focus_values);
-                // only show appropriate continuous focus mode
-                if( preview.isVideo() ) {
-                    supported_focus_values.remove("focus_mode_continuous_picture");
-                }
-                else {
-                    supported_focus_values.remove("focus_mode_continuous_video");
-                }
-            }
-            addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), 0, "TEST_FOCUS", new ButtonOptionsPopupListener() {
-                @Override
-                public void onClick(String option) {
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "clicked focus: " + option);
-                    preview.updateFocus(option, false, true);
-                    main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
-                }
-            });
+
+            setupFocusPane(main_activity, photo_mode, this, total_width_dp);
+
             if( MyDebug.LOG )
                 Log.d(TAG, "PopupView time 4: " + (System.nanoTime() - debug_time));
 
@@ -1051,6 +1008,80 @@ public class PopupView extends LinearLayout {
                     Log.d(TAG, "PopupView time 16: " + (System.nanoTime() - debug_time));
             }
 
+        }
+    }
+
+    public static void setupFocusPane(final MainActivity main_activity, MyApplicationInterface.PhotoMode photo_mode,
+            ViewGroup parent, int total_width_dp) {
+        final Preview preview = main_activity.getPreview();
+        // make a copy of getSupportedFocusValues() so we can modify it
+        List<String> supported_focus_values = preview.getSupportedFocusValues();
+        if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+            // don't show focus modes in focus bracketing mode (as we'll always run in manual focus mode)
+            supported_focus_values = null;
+        }
+        if( supported_focus_values != null ) {
+            supported_focus_values = new ArrayList<>(supported_focus_values);
+            // only show appropriate continuous focus mode
+            if( preview.isVideo() ) {
+                supported_focus_values.remove("focus_mode_continuous_picture");
+            }
+            else {
+                supported_focus_values.remove("focus_mode_continuous_video");
+            }
+        }
+        //addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values,
+        // getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), 0, "TEST_FOCUS",
+        // new ButtonOptionsPopupListener() {
+        createButtonOptions(parent, main_activity, total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(),
+                supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, parent.getResources().getString(R.string.focus_mode),
+                true, preview.getCurrentFlashValue(), 0, "TEST_FLASH",
+                new ButtonOptionsPopupListener() {
+            @Override
+            public void onClick(String option) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "clicked focus: " + option);
+                preview.updateFocus(option, false, true);
+                main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
+            }
+        });
+    }
+
+    public static void setupFlashPane(final MainActivity main_activity, ViewGroup parent, int total_width_dp) {
+        final Preview preview = main_activity.getPreview();
+        List<String> supported_flash_values = preview.getSupportedFlashValues();
+        if( preview.isVideo() && supported_flash_values != null ) {
+            // filter flash modes we don't want to show
+            List<String> filter = new ArrayList<>();
+            for(String flash_value : supported_flash_values) {
+                if( Preview.isFlashSupportedForVideo(flash_value) )
+                    filter.add(flash_value);
+            }
+            supported_flash_values = filter;
+        }
+        if( supported_flash_values != null && supported_flash_values.size() > 1 ) { // no point showing flash options if only one available!
+
+            //
+            //List<String> supported_options, int icons_id, int values_id, String prefix_string, String current_value,
+            //int max_buttons_per_row, String test_key, final ButtonOptionsPopupListener listener
+            //
+            //addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values,
+            //        getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), 0,
+            //        "TEST_FLASH", new ButtonOptionsPopupListener() {
+
+            createButtonOptions(parent, main_activity, total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(),
+                    supported_flash_values, R.array.flash_icons, R.array.flash_values, parent.getResources().getString(R.string.flash_mode),
+                    true, preview.getCurrentFlashValue(), 0, "TEST_FLASH",
+                    new ButtonOptionsPopupListener() {
+                @Override
+                public void onClick(String option) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "clicked flash: " + option);
+                    preview.updateFlash(option);
+                    main_activity.getMainUI().setPopupIcon();
+                    main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
+                }
+            });
         }
     }
 
