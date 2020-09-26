@@ -2752,8 +2752,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         String last_metering = sharedPreferences.getString(PreferenceKeys.AEMeteringModeKey, "metering_off");
         if (last_metering.equals("metering_avg")) {
             return CameraController.AEMeteringMode.AEMETERING_AVERAGE;
-        } else if (last_metering.equals("metering_spot")) {
-            return CameraController.AEMeteringMode.AEMETERING_SPOT;
+        } else if (last_metering.equals("metering_touch")) {
+            return CameraController.AEMeteringMode.AEMETERING_TOUCH;
         } else if (last_metering.equals("metering_center")) {
             return CameraController.AEMeteringMode.AEMETERING_CENTER;
         }
@@ -2765,8 +2765,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         String new_metering;
         if (ae_metering_mode == CameraController.AEMeteringMode.AEMETERING_AVERAGE) {
             new_metering = "metering_avg";
-        } else if (ae_metering_mode == CameraController.AEMeteringMode.AEMETERING_SPOT) {
-            new_metering = "metering_spot";
+        } else if (ae_metering_mode == CameraController.AEMeteringMode.AEMETERING_TOUCH) {
+            new_metering = "metering_touch";
         } else if (ae_metering_mode == CameraController.AEMeteringMode.AEMETERING_CENTER) {
             new_metering = "metering_center";
         } else {

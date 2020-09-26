@@ -511,7 +511,7 @@ public abstract class CameraController {
     public abstract boolean getAutoExposureLock();
     public enum AEMeteringMode {
         AEMETERING_AVERAGE,
-        AEMETERING_SPOT,
+        AEMETERING_TOUCH,
         AEMETERING_CENTER,
         AEMETERING_OFF
     }

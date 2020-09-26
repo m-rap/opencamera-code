@@ -4750,7 +4750,7 @@ public class CameraController2 extends CameraController {
             };
         } else {
 
-            if (aeMeteringMode == AEMeteringMode.AEMETERING_SPOT && areas != null && !areas.isEmpty()) {
+            if (aeMeteringMode == AEMeteringMode.AEMETERING_TOUCH && areas != null && !areas.isEmpty()) {
                 camera_settings.ae_regions = new MeteringRectangle[areas.size()];
                 int i = 0;
                 for (Area a : areas) {

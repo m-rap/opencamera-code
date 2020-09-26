@@ -1435,7 +1435,7 @@ public class CameraController1 extends CameraController {
 
         } else {
 
-            if (aeMeteringMode == AEMeteringMode.AEMETERING_SPOT) {
+            if (aeMeteringMode == AEMeteringMode.AEMETERING_TOUCH) {
                 if (supportedMeteringValuesArr.length > 0 && supportedMeteringValues.contains("spot-metering")) {
                     // on Mi A1 spot-metering much more like center-metering, I expect region selected by user
                     //parameters[0].set("auto-exposure", "spot-metering");
@@ -1452,7 +1452,7 @@ public class CameraController1 extends CameraController {
                 }
             }
 
-            if (aeMeteringMode == AEMeteringMode.AEMETERING_SPOT && camera_areas != null && !camera_areas.isEmpty()) {
+            if (aeMeteringMode == AEMeteringMode.AEMETERING_TOUCH && camera_areas != null && !camera_areas.isEmpty()) {
 
                 parameters[0].setMeteringAreas(camera_areas);
 

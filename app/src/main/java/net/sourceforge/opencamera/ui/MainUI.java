@@ -1965,9 +1965,9 @@ public class MainUI {
             metering_container.setVisibility(View.VISIBLE);
 
             final View metering_avg = main_activity.findViewById(R.id.metering_avg);
-            final View metering_spot = main_activity.findViewById(R.id.metering_spot);
+            final View metering_touch = main_activity.findViewById(R.id.metering_touch);
             final View metering_center = main_activity.findViewById(R.id.metering_center);
-            final View[] metering_btns = new View[] {metering_avg, metering_spot, metering_center};
+            final View[] metering_btns = new View[] {metering_avg, metering_touch, metering_center};
 
             View.OnClickListener meteringOnClickListener = new View.OnClickListener() {
                 @Override
@@ -1984,8 +1984,8 @@ public class MainUI {
                         int v_id = v.getId();
                         if (v_id == R.id.metering_avg) {
                             pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_AVERAGE);
-                        } else if (v_id == R.id.metering_spot) {
-                            pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_SPOT);
+                        } else if (v_id == R.id.metering_touch) {
+                            pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_TOUCH);
                         } else if (v_id == R.id.metering_center) {
                             pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_CENTER);
                         }
@@ -1996,9 +1996,9 @@ public class MainUI {
                     if (curr_mode == CameraController.AEMeteringMode.AEMETERING_AVERAGE) {
                         metering_avg.setAlpha(1.0f);
                         new_metering = "metering_avg";
-                    } else if (curr_mode == CameraController.AEMeteringMode.AEMETERING_SPOT) {
-                        metering_spot.setAlpha(1.0f);
-                        new_metering = "metering_spot";
+                    } else if (curr_mode == CameraController.AEMeteringMode.AEMETERING_TOUCH) {
+                        metering_touch.setAlpha(1.0f);
+                        new_metering = "metering_touch";
                     } else if (curr_mode == CameraController.AEMeteringMode.AEMETERING_CENTER) {
                         metering_center.setAlpha(1.0f);
                         new_metering = "metering_center";
@@ -2013,7 +2013,7 @@ public class MainUI {
             };
 
             metering_avg.setOnClickListener(meteringOnClickListener);
-            metering_spot.setOnClickListener(meteringOnClickListener);
+            metering_touch.setOnClickListener(meteringOnClickListener);
             metering_center.setOnClickListener(meteringOnClickListener);
 
             // initial set button alpha for current active mode

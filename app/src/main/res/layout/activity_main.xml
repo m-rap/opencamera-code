@@ -548,20 +548,20 @@
                 android:layout_marginLeft="20dp"
                 android:background="@drawable/ic_metering_avg" />
             <ImageView
-                android:id="@+id/metering_spot"
+                android:id="@+id/metering_touch"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:alpha="0.6"
                 android:layout_toRightOf="@id/metering_avg"
                 android:layout_alignTop="@id/metering_avg"
                 android:layout_marginLeft="20dp"
-                android:background="@drawable/ic_metering_spot" />
+                android:background="@drawable/ic_metering_touch" />
             <ImageView
                 android:id="@+id/metering_center"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:alpha="0.6"
-                android:layout_toRightOf="@id/metering_spot"
+                android:layout_toRightOf="@id/metering_touch"
                 android:layout_alignTop="@id/metering_avg"
                 android:layout_marginLeft="20dp"
                 android:background="@drawable/ic_metering_center" />
