@@ -1857,7 +1857,7 @@ public class MainActivity extends Activity {
     }
 
     public void clickedMetering(View view) {
-        mainUI.toggleMeteringUI();
+        mainUI.toggleAEMeteringUI();
     }
 
     public void clickedSettings(View view) {

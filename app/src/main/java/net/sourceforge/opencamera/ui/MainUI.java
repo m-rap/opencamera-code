@@ -320,7 +320,10 @@ public class MainUI {
             buttons_permanent.add(main_activity.findViewById(R.id.settings));
             buttons_permanent.add(main_activity.findViewById(R.id.popup));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure));
-            buttons_permanent.add(main_activity.findViewById(R.id.metering_button));
+
+            ae_metering_uis.metering_button = main_activity.findViewById(R.id.metering_button);
+            buttons_permanent.add(ae_metering_uis.metering_button);
+
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
             buttons_permanent.add(main_activity.findViewById(R.id.exposure_lock));
@@ -1356,6 +1359,7 @@ public class MainUI {
         this.updateAutoLevelIcon();
         this.updateCycleFlashIcon();
         this.updateFaceDetectionIcon();
+        ae_metering_uis.onAEMeteringChange();
     }
 
     public void audioControlStarted() {
@@ -1400,31 +1404,34 @@ public class MainUI {
     /**
      * Opens or close metering settings
      */
-    public void toggleMeteringUI() {
+    public void toggleAEMeteringUI() {
         closePopup();
         closeExposureUI();
-        if (isMeteringUIOpen()) {
-            closeMeteringUI();
+        if (isAEMeteringUIOpen()) {
+            closeAEMeteringUI();
         } else if (main_activity.getPreview().getCameraController() != null) {
-            setupMeteringUI();
+            setupAEMeteringUI();
         }
     }
 
-    private boolean isMeteringUIOpen() {
+    private boolean isAEMeteringUIOpen() {
         View view = main_activity.findViewById(R.id.metering_container_outside);
         return view.getVisibility() == View.VISIBLE;
     }
 
-    public void closeMeteringUI() {
+    public void closeAEMeteringUI() {
+        ae_metering_uis.metering_avg = null;
+        ae_metering_uis.metering_touch = null;
+        ae_metering_uis.metering_center = null;
         View view = main_activity.findViewById(R.id.metering_container_outside);
         view.setVisibility(View.GONE);
     }
 
-    private void setupMeteringUI() {
+    private void setupAEMeteringUI() {
         View view = main_activity.findViewById(R.id.metering_container_outside);
         view.setVisibility(View.VISIBLE);
 
-        setupMeteringPane(
+        setupAEMeteringPane(
                 view.findViewById(R.id.metering_avg_outside),
                 view.findViewById(R.id.metering_touch_outside),
                 view.findViewById(R.id.metering_center_outside));
@@ -1796,11 +1803,84 @@ public class MainUI {
     private int iso_button_manual_index = -1;
     private final static String manual_iso_value = "m";
 
-    private void setupMeteringPane(View avg, View touch, View center) {
-        final View metering_avg = avg;
-        final View metering_touch = touch;
-        final View metering_center = center;
-        final View[] metering_btns = new View[] {avg, touch, center};
+    public class AEMeteringUIs {
+        View metering_avg = null;
+        View metering_touch = null;
+        View metering_center = null;
+        ImageButton metering_button = null;
+
+        public void onAEMeteringChange() {
+            Preview pr = main_activity.getPreview();
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            String old_mode_str = sharedPreferences.getString(PreferenceKeys.AEMeteringModeKey, "metering_off");
+            CameraController.AEMeteringMode old_mode =
+                    old_mode_str.equals("metering_avg") ? CameraController.AEMeteringMode.AEMETERING_AVERAGE :
+                    old_mode_str.equals("metering_touch") ? CameraController.AEMeteringMode.AEMETERING_TOUCH :
+                    old_mode_str.equals("metering_center") ? CameraController.AEMeteringMode.AEMETERING_CENTER :
+                    CameraController.AEMeteringMode.AEMETERING_OFF;
+
+            View[] metering_btns;
+            if (metering_avg != null) {
+                metering_btns = new View[]{
+                        metering_avg, metering_touch, metering_center
+                };
+            } else {
+                metering_btns = new View[0];
+            }
+
+            for (View view : metering_btns) {
+                view.setAlpha(0.6f);
+            }
+
+            String new_metering;
+            CameraController.AEMeteringMode curr_mode = pr.getAEMeteringMode();
+            if (curr_mode == CameraController.AEMeteringMode.AEMETERING_OFF) {
+                curr_mode = old_mode;
+            }
+            if (curr_mode == CameraController.AEMeteringMode.AEMETERING_AVERAGE) {
+                if (metering_avg != null) {
+                    metering_avg.setAlpha(1.0f);
+                }
+                if (metering_button != null) {
+                    metering_button.setImageResource(R.drawable.ic_metering_avg);
+                }
+                new_metering = "metering_avg";
+            } else if (curr_mode == CameraController.AEMeteringMode.AEMETERING_TOUCH) {
+                if (metering_touch != null) {
+                    metering_touch.setAlpha(1.0f);
+                }
+                if (metering_button != null) {
+                    metering_button.setImageResource(R.drawable.ic_metering_touch);
+                }
+                new_metering = "metering_touch";
+            } else if (curr_mode == CameraController.AEMeteringMode.AEMETERING_CENTER) {
+                if (metering_center != null) {
+                    metering_center.setAlpha(1.0f);
+                }
+                if (metering_button != null) {
+                    metering_button.setImageResource(R.drawable.ic_metering_center);
+                }
+                new_metering = "metering_center";
+            } else {
+                new_metering = "metering_off";
+            }
+            if (!new_metering.equals(old_mode_str)) {
+                if (MyDebug.LOG) {
+                    Log.d(TAG, "set preference new metering " + new_metering);
+                }
+                editor.putString(PreferenceKeys.AEMeteringModeKey, new_metering);
+                editor.apply();
+            }
+        }
+    }
+
+    public AEMeteringUIs ae_metering_uis = new AEMeteringUIs();
+
+    private void setupAEMeteringPane(final View metering_avg, final View metering_touch, final View metering_center) {
+        ae_metering_uis.metering_avg = metering_avg;
+        ae_metering_uis.metering_touch = metering_touch;
+        ae_metering_uis.metering_center = metering_center;
 
         View.OnClickListener meteringOnClickListener = new View.OnClickListener() {
             @Override
@@ -1808,13 +1888,7 @@ public class MainUI {
                 if (MyDebug.LOG && v != null) {
                     Log.d(TAG, "clicked " + v.getResources().getResourceName(v.getId()));
                 }
-                for (View view : metering_btns) {
-                    view.setAlpha(0.6f);
-                }
 
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                String old_metering = sharedPreferences.getString(PreferenceKeys.AEMeteringModeKey, "metering_off");
                 Preview pr = main_activity.getPreview();
 
                 if (v != null) {
@@ -1827,24 +1901,7 @@ public class MainUI {
                     }
                 }
 
-                String new_metering;
-                CameraController.AEMeteringMode curr_mode = pr.getAEMeteringMode();
-                if (curr_mode == CameraController.AEMeteringMode.AEMETERING_AVERAGE) {
-                    metering_avg.setAlpha(1.0f);
-                    new_metering = "metering_avg";
-                } else if (curr_mode == CameraController.AEMeteringMode.AEMETERING_TOUCH) {
-                    metering_touch.setAlpha(1.0f);
-                    new_metering = "metering_touch";
-                } else if (curr_mode == CameraController.AEMeteringMode.AEMETERING_CENTER) {
-                    metering_center.setAlpha(1.0f);
-                    new_metering = "metering_center";
-                } else {
-                    new_metering = "metering_off";
-                }
-                if (!new_metering.equals(old_metering) || new_metering.equals("metering_off")) {
-                    editor.putString(PreferenceKeys.AEMeteringModeKey, new_metering);
-                    editor.apply();
-                }
+                ae_metering_uis.onAEMeteringChange();
             }
         };
 
@@ -1852,8 +1909,7 @@ public class MainUI {
         metering_touch.setOnClickListener(meteringOnClickListener);
         metering_center.setOnClickListener(meteringOnClickListener);
 
-        // initial set button alpha for current active mode
-        meteringOnClickListener.onClick(null);
+        ae_metering_uis.onAEMeteringChange();
     }
 
     /** Opens the exposure UI if not already open, and sets up or updates the UI.
@@ -2064,7 +2120,7 @@ public class MainUI {
         if (supports_ae_metering) {
             metering_container.setVisibility(View.VISIBLE);
 
-            setupMeteringPane(
+            setupAEMeteringPane(
                     metering_container.findViewById(R.id.metering_avg),
                     metering_container.findViewById(R.id.metering_touch),
                     metering_container.findViewById(R.id.metering_center));
