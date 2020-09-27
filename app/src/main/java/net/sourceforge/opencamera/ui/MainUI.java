@@ -1389,6 +1389,7 @@ public class MainUI {
         if( MyDebug.LOG )
             Log.d(TAG, "toggleExposureUI");
         closePopup();
+        closeAEMeteringUI();
         mSelectingExposureUIElement = false;
         if( isExposureUIOpen() ) {
             closeExposureUI();
@@ -2472,6 +2473,7 @@ public class MainUI {
             Log.d(TAG, "open popup");
 
         closeExposureUI();
+        closeAEMeteringUI();
         main_activity.getPreview().cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         main_activity.stopAudioListeners();
 
