@@ -1072,7 +1072,8 @@ public class DrawPreview {
     private void onDrawInfoLines(Canvas canvas, final int top_x, final int top_y, final int bottom_y, long time_ms) {
         Preview preview = main_activity.getPreview();
         CameraController camera_controller = preview.getCameraController();
-        int ui_rotation = preview.getUIRotation();
+        //int ui_rotation = preview.getUIRotation();
+        int ui_rotation = 0;
 
         // set up text etc for the multiple lines of "info" (time, free mem, etc)
         p.setTextSize(16 * scale + 0.5f); // convert dps to pixels
@@ -1099,6 +1100,7 @@ public class DrawPreview {
 
         int first_line_height = 0;
         int first_line_xshift = 0;
+
         if( show_time_pref ) {
             if( current_time_string == null || time_ms/1000 > last_current_time_time/1000 ) {
                 // avoid creating a new calendar object every time
@@ -1677,7 +1679,8 @@ public class DrawPreview {
     private void drawUI(Canvas canvas, long time_ms) {
         Preview preview = main_activity.getPreview();
         CameraController camera_controller = preview.getCameraController();
-        int ui_rotation = preview.getUIRotation();
+        //int ui_rotation = preview.getUIRotation();
+        int ui_rotation = 0;
         MainUI.UIPlacement ui_placement = main_activity.getMainUI().getUIPlacement();
         boolean has_level_angle = preview.hasLevelAngle();
         double level_angle = preview.getLevelAngle();
@@ -1686,7 +1689,6 @@ public class DrawPreview {
         int text_base_y = 0;
 
         canvas.save();
-        canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
 
         if( camera_controller != null && !preview.isPreviewPaused() ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
