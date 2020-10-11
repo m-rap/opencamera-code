@@ -1094,6 +1094,10 @@ public class PopupView extends LinearLayout {
         return (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
     }
 
+    int getTotalWidthDp() {
+        return total_width_dp;
+    }
+
     private void changePhotoMode(List<String> photo_modes, List<MyApplicationInterface.PhotoMode> photo_mode_values, String option) {
         if( MyDebug.LOG )
             Log.d(TAG, "changePhotoMode: " + option);

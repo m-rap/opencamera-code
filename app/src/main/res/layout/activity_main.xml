@@ -705,6 +705,29 @@
             android:background="@drawable/ic_metering_center" />
     </RelativeLayout>
 
+    <ImageButton
+        android:id="@+id/autofocus_button"
+        android:layout_width="@dimen/onscreen_button_size"
+        android:layout_height="@dimen/onscreen_button_size"
+        android:background="@color/icons_background"
+        android:backgroundTint="@color/icons_background_tint"
+        android:backgroundTintMode="src_in"
+        android:src="@drawable/focus_mode_auto"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:onClick="clickedMetering" />
+
+    <RelativeLayout
+        android:id="@+id/autofocus_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@color/seekbar_background"
+        android:visibility="gone"
+        >
+    </RelativeLayout>
+
     <FrameLayout
         android:id="@+id/locker"
         android:layout_width="match_parent"

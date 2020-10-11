@@ -1416,6 +1416,20 @@ public class MainUI {
         }
     }
 
+    /**
+     * Opens or close autofocus settings
+     */
+    public void toggleAutofocusUI() {
+        closeAEMeteringUI();
+        closeExposureUI();
+        closePopup();
+        if (isAutofocusUIOpen()) {
+            closeAutofocusUI();
+        } else {
+            setupAutofocusUI();
+        }
+    }
+
     private boolean isAEMeteringUIOpen() {
         View view = main_activity.findViewById(R.id.metering_container_outside);
         return view.getVisibility() == View.VISIBLE;
@@ -1437,6 +1451,23 @@ public class MainUI {
                 view.findViewById(R.id.metering_avg_outside),
                 view.findViewById(R.id.metering_touch_outside),
                 view.findViewById(R.id.metering_center_outside));
+    }
+
+    private boolean isAutofocusUIOpen() {
+        ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
+        return view.getVisibility() == View.VISIBLE;
+    }
+
+    private void closeAutofocusUI() {
+        ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
+        view.setVisibility(View.GONE);
+    }
+
+    private void setupAutofocusUI() {
+        ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
+        view.setVisibility(View.VISIBLE);
+        MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
+        PopupView.setupFocusPane(main_activity, photo_mode, view, popup_view.getTotalWidthDp());
     }
 
     private void initRemoteControlForExposureUI() {
