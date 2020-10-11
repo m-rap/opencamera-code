@@ -1,1 +1,5 @@
-include ':app'
+include ':mrapcamera'
+project(':mrapcamera').projectDir = new File('mrapcamera/adapterapp')
+
+include ':opencamera-glue'
+project(':opencamera-glue').projectDir = new File('mrapcamera/opencamera-glue')
