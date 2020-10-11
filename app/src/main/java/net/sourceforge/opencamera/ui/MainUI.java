@@ -165,14 +165,15 @@ public class MainUI {
     private UIPlacement computeUIPlacement() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         String ui_placement_string = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_top");
-        switch( ui_placement_string ) {
-            case "ui_left":
-                return UIPlacement.UIPLACEMENT_LEFT;
-            case "ui_top":
-                return UIPlacement.UIPLACEMENT_TOP;
-            default:
-                return UIPlacement.UIPLACEMENT_RIGHT;
-        }
+//        switch( ui_placement_string ) {
+//            case "ui_left":
+//                return UIPlacement.UIPLACEMENT_LEFT;
+//            case "ui_top":
+//                return UIPlacement.UIPLACEMENT_TOP;
+//            default:
+//                return UIPlacement.UIPLACEMENT_RIGHT;
+//        }
+        return UIPlacement.UIPLACEMENT_LEFT;
     }
 
     private void layoutUI(boolean popup_container_only) {
@@ -2115,20 +2116,20 @@ public class MainUI {
         }
 
         View metering_container = main_activity.findViewById(R.id.metering_container);
-        boolean supports_ae_metering = main_activity.getPreview().supportsAEMetering();
-        if( MyDebug.LOG )
-            Log.d(TAG, "supports_ae_metering " + supports_ae_metering);
-        if (supports_ae_metering) {
-            metering_container.setVisibility(View.VISIBLE);
-
-            setupAEMeteringPane(
-                    metering_container.findViewById(R.id.metering_avg),
-                    metering_container.findViewById(R.id.metering_touch),
-                    metering_container.findViewById(R.id.metering_center));
-
-        } else {
+//        boolean supports_ae_metering = main_activity.getPreview().supportsAEMetering();
+//        if( MyDebug.LOG )
+//            Log.d(TAG, "supports_ae_metering " + supports_ae_metering);
+//        if (supports_ae_metering) {
+//            metering_container.setVisibility(View.VISIBLE);
+//
+//            setupAEMeteringPane(
+//                    metering_container.findViewById(R.id.metering_avg),
+//                    metering_container.findViewById(R.id.metering_touch),
+//                    metering_container.findViewById(R.id.metering_center));
+//
+//        } else {
             metering_container.setVisibility(View.GONE);
-        }
+        //}
 
         //layoutUI(); // needed to update alignment of exposure UI
     }

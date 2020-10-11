@@ -1029,13 +1029,17 @@ public class PopupView extends LinearLayout {
             else {
                 supported_focus_values.remove("focus_mode_continuous_video");
             }
+            supported_focus_values.remove("focus_mode_infinity");
+            supported_focus_values.remove("focus_mode_macro");
+            supported_focus_values.remove("focus_mode_locked");
+            supported_focus_values.remove("focus_mode_fixed");
         }
         //addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values,
         // getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), 0, "TEST_FOCUS",
         // new ButtonOptionsPopupListener() {
         createButtonOptions(parent, main_activity, total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(),
                 supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, parent.getResources().getString(R.string.focus_mode),
-                true, preview.getCurrentFlashValue(), 0, "TEST_FLASH",
+                true, preview.getCurrentFocusValue(), 0, "TEST_FOCUS",
                 new ButtonOptionsPopupListener() {
             @Override
             public void onClick(String option) {
