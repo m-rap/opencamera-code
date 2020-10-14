@@ -1860,6 +1860,10 @@ public class MainActivity extends Activity {
         mainUI.toggleAEMeteringUI();
     }
 
+    public void clickedAutofocus(View view) {
+        mainUI.toggleAutofocusUI();
+    }
+
     public void clickedSettings(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedSettings");

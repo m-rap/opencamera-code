@@ -715,7 +715,7 @@
         android:src="@drawable/focus_mode_auto"
         android:padding="10dp"
         android:scaleType="fitCenter"
-        android:onClick="clickedMetering" />
+        android:onClick="clickedAutofocus" />
 
     <RelativeLayout
         android:id="@+id/autofocus_container"

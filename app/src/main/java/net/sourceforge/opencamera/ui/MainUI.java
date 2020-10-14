@@ -324,6 +324,7 @@ public class MainUI {
 
             ae_metering_uis.metering_button = main_activity.findViewById(R.id.metering_button);
             buttons_permanent.add(ae_metering_uis.metering_button);
+            buttons_permanent.add(main_activity.findViewById(R.id.autofocus_button));
 
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
@@ -1391,6 +1392,7 @@ public class MainUI {
             Log.d(TAG, "toggleExposureUI");
         closePopup();
         closeAEMeteringUI();
+        closeAutofocusUI();
         mSelectingExposureUIElement = false;
         if( isExposureUIOpen() ) {
             closeExposureUI();
@@ -1409,6 +1411,7 @@ public class MainUI {
     public void toggleAEMeteringUI() {
         closePopup();
         closeExposureUI();
+        closeAutofocusUI();
         if (isAEMeteringUIOpen()) {
             closeAEMeteringUI();
         } else if (main_activity.getPreview().getCameraController() != null) {
@@ -1467,7 +1470,7 @@ public class MainUI {
         ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
         view.setVisibility(View.VISIBLE);
         MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
-        PopupView.setupFocusPane(main_activity, photo_mode, view, popup_view.getTotalWidthDp());
+        PopupView.setupFocusPane(main_activity, photo_mode, view, 280);
     }
 
     private void initRemoteControlForExposureUI() {
@@ -2506,6 +2509,7 @@ public class MainUI {
 
         closeExposureUI();
         closeAEMeteringUI();
+        closeAutofocusUI();
         main_activity.getPreview().cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         main_activity.stopAudioListeners();
 
