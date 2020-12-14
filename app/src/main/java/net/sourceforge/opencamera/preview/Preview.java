@@ -385,6 +385,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public volatile boolean test_runtime_on_video_stop; // force throwing a RuntimeException when stopping video (this usually happens naturally when stopping video too soon)
     public volatile boolean test_burst_resolution;
 
+    public interface FocusChangeListener {
+        void onFocusChanged(String focus_value);
+    }
+
+    private ArrayList<FocusChangeListener> focusChangeListeners = new ArrayList<>();
+    public void addFocusChangeListener(FocusChangeListener l) {
+        focusChangeListeners.add(l);
+    }
+    public void removeFocuseChangeListener(FocusChangeListener l) {
+        focusChangeListeners.remove(l);
+    }
+
     public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "new Preview");
@@ -4779,6 +4791,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 }
             }
             this.setFocusValue(focus_value, auto_focus);
+
+            for (FocusChangeListener l : focusChangeListeners) {
+                l.onFocusChanged(focus_value);
+            }
 
             if( save ) {
                 // now save

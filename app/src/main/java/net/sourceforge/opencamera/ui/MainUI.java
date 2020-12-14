@@ -59,6 +59,7 @@ public class MainUI {
     private boolean force_destroy_popup = false; // if true, then the popup isn't cached for only the next time the popup is closed
 
     private int current_orientation;
+    private List<View> focusOptionButtons = null;
 
     enum UIPlacement {
         UIPLACEMENT_RIGHT,
@@ -1470,7 +1471,7 @@ public class MainUI {
         ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
         view.setVisibility(View.VISIBLE);
         MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
-        PopupView.setupFocusPane(main_activity, photo_mode, view, 280);
+        focusOptionButtons = PopupView.setupFocusPane(main_activity, photo_mode, view, 280);
     }
 
     private void initRemoteControlForExposureUI() {

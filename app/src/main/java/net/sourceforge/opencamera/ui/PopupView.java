@@ -1011,7 +1011,7 @@ public class PopupView extends LinearLayout {
         }
     }
 
-    public static void setupFocusPane(final MainActivity main_activity, MyApplicationInterface.PhotoMode photo_mode,
+    public static List<View> setupFocusPane(final MainActivity main_activity, MyApplicationInterface.PhotoMode photo_mode,
             ViewGroup parent, int total_width_dp) {
         final Preview preview = main_activity.getPreview();
         // make a copy of getSupportedFocusValues() so we can modify it
@@ -1034,6 +1034,9 @@ public class PopupView extends LinearLayout {
             supported_focus_values.remove("focus_mode_locked");
             supported_focus_values.remove("focus_mode_fixed");
         }
+
+        final ViewGroup viewParent = parent;
+
         //addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values,
         // getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), 0, "TEST_FOCUS",
         // new ButtonOptionsPopupListener() {
@@ -1046,7 +1049,10 @@ public class PopupView extends LinearLayout {
                 if( MyDebug.LOG )
                     Log.d(TAG, "clicked focus: " + option);
                 preview.updateFocus(option, false, true);
-                main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
+
+                if (viewParent instanceof PopupView) {
+                    main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
+                }
             }
         });
     }
@@ -1265,7 +1271,10 @@ public class PopupView extends LinearLayout {
         createButtonOptions(this, this.getContext(), total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(), supported_options, icons_id, values_id, prefix_string, true, current_value, max_buttons_per_row, test_key, listener);
     }
 
-    static List<View> createButtonOptions(ViewGroup parent, Context context, int total_width_dp, Map<String, View> test_ui_buttons, List<String> supported_options, int icons_id, int values_id, String prefix_string, boolean include_prefix, String current_value, int max_buttons_per_row, String test_key, final ButtonOptionsPopupListener listener) {
+    static List<View> createButtonOptions(ViewGroup parent, Context context, int total_width_dp,
+            Map<String, View> test_ui_buttons, List<String> supported_options, int icons_id,
+            int values_id, String prefix_string, boolean include_prefix, String current_value,
+            int max_buttons_per_row, String test_key, final ButtonOptionsPopupListener listener) {
         if( MyDebug.LOG )
             Log.d(TAG, "createButtonOptions");
         final List<View> buttons = new ArrayList<>();
