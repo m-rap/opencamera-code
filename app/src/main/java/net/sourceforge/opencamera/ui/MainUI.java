@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -324,7 +325,21 @@ public class MainUI {
 
             ae_metering_uis.metering_button = main_activity.findViewById(R.id.metering_button);
             buttons_permanent.add(ae_metering_uis.metering_button);
-            buttons_permanent.add(main_activity.findViewById(R.id.autofocus_button));
+
+            af_uis.autofocus_button = main_activity.findViewById(R.id.autofocus_button);
+            af_uis.container = main_activity.findViewById(R.id.autofocus_container);
+            if (af_uis.focusOptionButtons == null) {
+                MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
+                af_uis.focusOptionButtons = PopupView.setupFocusPane(main_activity, photo_mode, af_uis.container, 280);
+            }
+            if (af_uis.focusOptionButtons.buttons.size() == 0) {
+                af_uis.container.removeAllViews();
+                af_uis.focusOptionButtons = null;
+            } else {
+                main_activity.getPreview().addFocusChangeListener(af_uis);
+                af_uis.onFocusChanged(main_activity.getPreview().getCurrentFocusValue());
+            }
+            buttons_permanent.add(af_uis.autofocus_button);
 
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_camera));
@@ -1468,12 +1483,12 @@ public class MainUI {
     }
 
     private void setupAutofocusUI() {
-        if (af_uis.container == null) {
-            af_uis.container = main_activity.findViewById(R.id.autofocus_container);
-        }
+//        if (af_uis.container == null) {
+//            af_uis.container = main_activity.findViewById(R.id.autofocus_container);
+//        }
         af_uis.container.setVisibility(View.VISIBLE);
-        MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
         if (af_uis.focusOptionButtons == null) {
+            MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
             af_uis.focusOptionButtons = PopupView.setupFocusPane(main_activity, photo_mode, af_uis.container, 280);
             main_activity.getPreview().addFocusChangeListener(af_uis);
         }
@@ -1918,20 +1933,33 @@ public class MainUI {
     }
 
     public class AFUIs implements Preview.FocusChangeListener {
+        View autofocus_button;
         ViewGroup container = null;
-        List<View> focusOptionButtons = null;
+        PopupView.ButtonOptionMap focusOptionButtons = null;
 
         @Override
         public void onFocusChanged(String focus_value) {
             if (focusOptionButtons == null) {
                 return;
             }
-            for (View v : focusOptionButtons) {
+            if (focusOptionButtons.buttons.size() == 0) {
+                return;
+            }
+            int activeBtn = 0;
+            for (int i = 0; i < focusOptionButtons.buttons.size(); i++) {
+                View v = focusOptionButtons.buttons.get(i);
                 if (v.getTag().equals(focus_value)) {
                     PopupView.setButtonSelected(v, true);
+                    activeBtn = i;
                 } else {
                     PopupView.setButtonSelected(v, false);
                 }
+            }
+            int resource = focusOptionButtons.icons.get(activeBtn);
+            if (resource != -1) {
+                Bitmap bm = main_activity.getPreloadedBitmap(resource);
+                if (bm != null)
+                    ((ImageButton)autofocus_button).setImageBitmap(bm);
             }
         }
     }
@@ -2120,7 +2148,7 @@ public class MainUI {
 
                 setupExposureUI();
             }
-        });
+        }).buttons;
         if( supported_isos != null ) {
             View iso_container_view = main_activity.findViewById(R.id.iso_container);
             iso_container_view.setVisibility(View.VISIBLE);

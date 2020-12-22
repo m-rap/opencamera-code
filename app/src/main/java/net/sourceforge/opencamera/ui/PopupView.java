@@ -1011,7 +1011,7 @@ public class PopupView extends LinearLayout {
         }
     }
 
-    public static List<View> setupFocusPane(final MainActivity main_activity, MyApplicationInterface.PhotoMode photo_mode,
+    public static ButtonOptionMap setupFocusPane(final MainActivity main_activity, MyApplicationInterface.PhotoMode photo_mode,
             ViewGroup parent, int total_width_dp) {
         final Preview preview = main_activity.getPreview();
         // make a copy of getSupportedFocusValues() so we can modify it
@@ -1271,13 +1271,19 @@ public class PopupView extends LinearLayout {
         createButtonOptions(this, this.getContext(), total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(), supported_options, icons_id, values_id, prefix_string, true, current_value, max_buttons_per_row, test_key, listener);
     }
 
-    static List<View> createButtonOptions(ViewGroup parent, Context context, int total_width_dp,
+    public static class ButtonOptionMap {
+        ArrayList<View> buttons;
+        ArrayList<Integer> icons;
+    }
+
+    static ButtonOptionMap createButtonOptions(ViewGroup parent, Context context, int total_width_dp,
             Map<String, View> test_ui_buttons, List<String> supported_options, int icons_id,
             int values_id, String prefix_string, boolean include_prefix, String current_value,
             int max_buttons_per_row, String test_key, final ButtonOptionsPopupListener listener) {
         if( MyDebug.LOG )
             Log.d(TAG, "createButtonOptions");
-        final List<View> buttons = new ArrayList<>();
+        final ArrayList<View> buttons = new ArrayList<>();
+        final ArrayList<Integer> resources = new ArrayList<>();
         if( supported_options != null ) {
             final long debug_time = System.nanoTime();
             LinearLayout ll2 = new LinearLayout(context);
@@ -1396,6 +1402,7 @@ public class PopupView extends LinearLayout {
                         Log.d(TAG, "addButtonOptionsToPopup time 2.11: " + (System.nanoTime() - debug_time));
                     view = image_button;
                     buttons.add(view);
+                    resources.add(resource);
                     ll2.addView(view);
                     if( MyDebug.LOG )
                         Log.d(TAG, "addButtonOptionsToPopup time 2.12: " + (System.nanoTime() - debug_time));
@@ -1421,6 +1428,7 @@ public class PopupView extends LinearLayout {
                     button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash! Also looks nicer anyway...
                     view = button;
                     buttons.add(view);
+                    resources.add(resource);
                     ll2.addView(view);
 
                     button.setText(button_string);
@@ -1506,7 +1514,10 @@ public class PopupView extends LinearLayout {
             if( MyDebug.LOG )
                 Log.d(TAG, "addButtonOptionsToPopup time 4: " + (System.nanoTime() - debug_time));
         }
-        return buttons;
+        ButtonOptionMap buttonOptionMap = new ButtonOptionMap();
+        buttonOptionMap.icons = resources;
+        buttonOptionMap.buttons = buttons;
+        return buttonOptionMap;
     }
 
     static void setButtonSelected(View view, boolean selected) {
