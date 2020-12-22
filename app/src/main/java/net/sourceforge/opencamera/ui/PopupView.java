@@ -1040,21 +1040,21 @@ public class PopupView extends LinearLayout {
         //addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values,
         // getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), 0, "TEST_FOCUS",
         // new ButtonOptionsPopupListener() {
-        createButtonOptions(parent, main_activity, total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(),
+        return createButtonOptions(parent, main_activity, total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(),
                 supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, parent.getResources().getString(R.string.focus_mode),
                 true, preview.getCurrentFocusValue(), 0, "TEST_FOCUS",
                 new ButtonOptionsPopupListener() {
-            @Override
-            public void onClick(String option) {
-                if( MyDebug.LOG )
-                    Log.d(TAG, "clicked focus: " + option);
-                preview.updateFocus(option, false, true);
+                    @Override
+                    public void onClick(String option) {
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "clicked focus: " + option);
+                        preview.updateFocus(option, false, true);
 
-                if (viewParent instanceof PopupView) {
-                    main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
-                }
-            }
-        });
+                        if (viewParent instanceof PopupView) {
+                            main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
+                        }
+                    }
+                });
     }
 
     public static void setupFlashPane(final MainActivity main_activity, ViewGroup parent, int total_width_dp) {

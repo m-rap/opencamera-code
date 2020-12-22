@@ -59,7 +59,6 @@ public class MainUI {
     private boolean force_destroy_popup = false; // if true, then the popup isn't cached for only the next time the popup is closed
 
     private int current_orientation;
-    private List<View> focusOptionButtons = null;
 
     enum UIPlacement {
         UIPLACEMENT_RIGHT,
@@ -1462,16 +1461,22 @@ public class MainUI {
         return view.getVisibility() == View.VISIBLE;
     }
 
-    private void closeAutofocusUI() {
-        ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
-        view.setVisibility(View.GONE);
+    public void closeAutofocusUI() {
+        if (af_uis.container != null) {
+            af_uis.container.setVisibility(View.GONE);
+        }
     }
 
     private void setupAutofocusUI() {
-        ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
-        view.setVisibility(View.VISIBLE);
+        if (af_uis.container == null) {
+            af_uis.container = main_activity.findViewById(R.id.autofocus_container);
+        }
+        af_uis.container.setVisibility(View.VISIBLE);
         MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
-        focusOptionButtons = PopupView.setupFocusPane(main_activity, photo_mode, view, 280);
+        if (af_uis.focusOptionButtons == null) {
+            af_uis.focusOptionButtons = PopupView.setupFocusPane(main_activity, photo_mode, af_uis.container, 280);
+            main_activity.getPreview().addFocusChangeListener(af_uis);
+        }
     }
 
     private void initRemoteControlForExposureUI() {
@@ -1912,7 +1917,27 @@ public class MainUI {
         }
     }
 
+    public class AFUIs implements Preview.FocusChangeListener {
+        ViewGroup container = null;
+        List<View> focusOptionButtons = null;
+
+        @Override
+        public void onFocusChanged(String focus_value) {
+            if (focusOptionButtons == null) {
+                return;
+            }
+            for (View v : focusOptionButtons) {
+                if (v.getTag().equals(focus_value)) {
+                    PopupView.setButtonSelected(v, true);
+                } else {
+                    PopupView.setButtonSelected(v, false);
+                }
+            }
+        }
+    }
+
     public AEMeteringUIs ae_metering_uis = new AEMeteringUIs();
+    public AFUIs af_uis = new AFUIs();
 
     private void setupAEMeteringPane(final View metering_avg, final View metering_touch, final View metering_center) {
         ae_metering_uis.metering_avg = metering_avg;

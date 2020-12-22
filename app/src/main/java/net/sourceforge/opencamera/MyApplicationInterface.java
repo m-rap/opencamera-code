@@ -1854,6 +1854,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public void touchEvent(MotionEvent event) {
         main_activity.getMainUI().closeExposureUI();
         main_activity.getMainUI().closePopup();
+        main_activity.getMainUI().closeAEMeteringUI();
+        main_activity.getMainUI().closeAutofocusUI();
         if( main_activity.usingKitKatImmersiveMode() ) {
             main_activity.setImmersiveMode(false);
         }
