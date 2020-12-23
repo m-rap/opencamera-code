@@ -1015,25 +1015,7 @@ public class PopupView extends LinearLayout {
             ViewGroup parent, int total_width_dp) {
         final Preview preview = main_activity.getPreview();
         // make a copy of getSupportedFocusValues() so we can modify it
-        List<String> supported_focus_values = preview.getSupportedFocusValues();
-        if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
-            // don't show focus modes in focus bracketing mode (as we'll always run in manual focus mode)
-            supported_focus_values = null;
-        }
-        if( supported_focus_values != null ) {
-            supported_focus_values = new ArrayList<>(supported_focus_values);
-            // only show appropriate continuous focus mode
-            if( preview.isVideo() ) {
-                supported_focus_values.remove("focus_mode_continuous_picture");
-            }
-            else {
-                supported_focus_values.remove("focus_mode_continuous_video");
-            }
-            supported_focus_values.remove("focus_mode_infinity");
-            supported_focus_values.remove("focus_mode_macro");
-            supported_focus_values.remove("focus_mode_locked");
-            supported_focus_values.remove("focus_mode_fixed");
-        }
+        List<String> supported_focus_values = getSupportedFocusValues(photo_mode, preview);
 
         final ViewGroup viewParent = parent;
 
@@ -1055,6 +1037,29 @@ public class PopupView extends LinearLayout {
                         }
                     }
                 });
+    }
+
+    public static List<String> getSupportedFocusValues(MyApplicationInterface.PhotoMode photo_mode, Preview preview) {
+        List<String> supported_focus_values = preview.getSupportedFocusValues();
+        if( !preview.isVideo() && photo_mode == MyApplicationInterface.PhotoMode.FocusBracketing ) {
+            // don't show focus modes in focus bracketing mode (as we'll always run in manual focus mode)
+            supported_focus_values = null;
+        }
+        if( supported_focus_values != null ) {
+            supported_focus_values = new ArrayList<>(supported_focus_values);
+            // only show appropriate continuous focus mode
+            if( preview.isVideo() ) {
+                supported_focus_values.remove("focus_mode_continuous_picture");
+            }
+            else {
+                supported_focus_values.remove("focus_mode_continuous_video");
+            }
+            supported_focus_values.remove("focus_mode_infinity");
+            supported_focus_values.remove("focus_mode_macro");
+            supported_focus_values.remove("focus_mode_locked");
+            supported_focus_values.remove("focus_mode_fixed");
+        }
+        return supported_focus_values;
     }
 
     public static void setupFlashPane(final MainActivity main_activity, ViewGroup parent, int total_width_dp) {

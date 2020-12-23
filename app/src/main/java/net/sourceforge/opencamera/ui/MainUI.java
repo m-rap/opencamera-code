@@ -327,18 +327,6 @@ public class MainUI {
             buttons_permanent.add(ae_metering_uis.metering_button);
 
             af_uis.autofocus_button = main_activity.findViewById(R.id.autofocus_button);
-            af_uis.container = main_activity.findViewById(R.id.autofocus_container);
-            if (af_uis.focusOptionButtons == null) {
-                MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
-                af_uis.focusOptionButtons = PopupView.setupFocusPane(main_activity, photo_mode, af_uis.container, 280);
-            }
-            if (af_uis.focusOptionButtons.buttons.size() == 0) {
-                af_uis.container.removeAllViews();
-                af_uis.focusOptionButtons = null;
-            } else {
-                main_activity.getPreview().addFocusChangeListener(af_uis);
-                af_uis.onFocusChanged(main_activity.getPreview().getCurrentFocusValue());
-            }
             buttons_permanent.add(af_uis.autofocus_button);
 
             //buttons_permanent.add(main_activity.findViewById(R.id.switch_video));
@@ -1376,7 +1364,9 @@ public class MainUI {
         this.updateAutoLevelIcon();
         this.updateCycleFlashIcon();
         this.updateFaceDetectionIcon();
+
         ae_metering_uis.onAEMeteringChange();
+        af_uis.onFocusChanged(main_activity.getPreview().getCurrentFocusValue());
     }
 
     public void audioControlStarted() {
@@ -1483,9 +1473,9 @@ public class MainUI {
     }
 
     private void setupAutofocusUI() {
-//        if (af_uis.container == null) {
-//            af_uis.container = main_activity.findViewById(R.id.autofocus_container);
-//        }
+        if (af_uis.container == null) {
+            af_uis.container = main_activity.findViewById(R.id.autofocus_container);
+        }
         af_uis.container.setVisibility(View.VISIBLE);
         if (af_uis.focusOptionButtons == null) {
             MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
@@ -1933,33 +1923,40 @@ public class MainUI {
     }
 
     public class AFUIs implements Preview.FocusChangeListener {
-        View autofocus_button;
+        ImageButton autofocus_button;
         ViewGroup container = null;
         PopupView.ButtonOptionMap focusOptionButtons = null;
 
         @Override
         public void onFocusChanged(String focus_value) {
-            if (focusOptionButtons == null) {
-                return;
+            int resource = -1;
+            if (focusOptionButtons != null && focusOptionButtons.buttons.size() > 0) {
+                int activeBtn = 0;
+                for (int i = 0; i < focusOptionButtons.buttons.size(); i++) {
+                    View v = focusOptionButtons.buttons.get(i);
+                    if (v.getTag().equals(focus_value)) {
+                        PopupView.setButtonSelected(v, true);
+                        activeBtn = i;
+                    } else {
+                        PopupView.setButtonSelected(v, false);
+                    }
+                }
+                resource = focusOptionButtons.icons.get(activeBtn);
             }
-            if (focusOptionButtons.buttons.size() == 0) {
-                return;
-            }
-            int activeBtn = 0;
-            for (int i = 0; i < focusOptionButtons.buttons.size(); i++) {
-                View v = focusOptionButtons.buttons.get(i);
-                if (v.getTag().equals(focus_value)) {
-                    PopupView.setButtonSelected(v, true);
-                    activeBtn = i;
-                } else {
-                    PopupView.setButtonSelected(v, false);
+            if (resource == -1) {
+                String[] icons = main_activity.getResources().getStringArray(R.array.focus_mode_icons);
+                String[] values = main_activity.getResources().getStringArray(R.array.focus_mode_values);
+                for (int i = 0; i < values.length; i++) {
+                    if (values[i].equals(focus_value)) {
+                        resource = main_activity.getResources().getIdentifier(icons[i], null, main_activity.getApplicationContext().getPackageName());
+                        break;
+                    }
                 }
             }
-            int resource = focusOptionButtons.icons.get(activeBtn);
             if (resource != -1) {
                 Bitmap bm = main_activity.getPreloadedBitmap(resource);
                 if (bm != null)
-                    ((ImageButton)autofocus_button).setImageBitmap(bm);
+                    autofocus_button.setImageBitmap(bm);
             }
         }
     }
