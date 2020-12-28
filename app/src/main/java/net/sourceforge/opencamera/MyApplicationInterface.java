@@ -1852,10 +1852,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void touchEvent(MotionEvent event) {
-        main_activity.getMainUI().closeExposureUI();
-        main_activity.getMainUI().closePopup();
-        main_activity.getMainUI().closeAEMeteringUI();
-        main_activity.getMainUI().closeAutofocusUI();
+        main_activity.onTouchedPreview();
         if( main_activity.usingKitKatImmersiveMode() ) {
             main_activity.setImmersiveMode(false);
         }
@@ -1863,41 +1860,16 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public void startingVideo() {
-        if( sharedPreferences.getBoolean(PreferenceKeys.LockVideoPreferenceKey, false) ) {
-            main_activity.lockScreen();
-        }
-        main_activity.stopAudioListeners(); // important otherwise MediaRecorder will fail to start() if we have an audiolistener! Also don't want to have the speech recognizer going off
-        ImageButton view = main_activity.findViewById(R.id.take_photo);
-        view.setImageResource(R.drawable.take_video_recording);
-        view.setContentDescription( getContext().getResources().getString(R.string.stop_video) );
-        view.setTag(R.drawable.take_video_recording); // for testing
-        main_activity.getMainUI().destroyPopup(); // as the available popup options change while recording video
+        main_activity.onStartingVideo(sharedPreferences.getBoolean(PreferenceKeys.LockVideoPreferenceKey, false));
     }
 
     @Override
     public void startedVideo() {
         if( MyDebug.LOG )
             Log.d(TAG, "startedVideo()");
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
-            if( !( main_activity.getMainUI().inImmersiveMode() && main_activity.usingKitKatImmersiveModeEverything() ) ) {
-                View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
-                pauseVideoButton.setVisibility(View.VISIBLE);
-            }
-            main_activity.getMainUI().setPauseVideoContentDescription();
-        }
-        if( main_activity.getPreview().supportsPhotoVideoRecording() && this.usePhotoVideoRecording() ) {
-            if( !( main_activity.getMainUI().inImmersiveMode() && main_activity.usingKitKatImmersiveModeEverything() ) ) {
-                View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
-                takePhotoVideoButton.setVisibility(View.VISIBLE);
-            }
-        }
-        if( main_activity.getMainUI().isExposureUIOpen() ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "need to update exposure UI for start video recording");
-            // need to update the exposure UI when starting/stopping video recording, to remove/add
-            // ability to switch between auto and manual
-            main_activity.getMainUI().setupExposureUI();
-        }
+
+        main_activity.onStartedVideo(this.usePhotoVideoRecording());
+
         final int video_method = this.createOutputVideoMethod();
         boolean dategeo_subtitles = getVideoSubtitlePref().equals("preference_video_subtitle_yes");
         if( dategeo_subtitles && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
@@ -2114,11 +2086,8 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     public void stoppingVideo() {
         if( MyDebug.LOG )
             Log.d(TAG, "stoppingVideo()");
-        main_activity.unlockScreen();
-        ImageButton view = main_activity.findViewById(R.id.take_photo);
-        view.setImageResource(R.drawable.take_video_selector);
-        view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
-        view.setTag(R.drawable.take_video_selector); // for testing
+
+        main_activity.onStoppingVideo();
     }
 
     @Override
@@ -2129,24 +2098,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             Log.d(TAG, "uri " + uri);
             Log.d(TAG, "filename " + filename);
         }
-        View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
-        pauseVideoButton.setVisibility(View.GONE);
-        View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
-        takePhotoVideoButton.setVisibility(View.GONE);
-        main_activity.getMainUI().setPauseVideoContentDescription(); // just to be safe
-        main_activity.getMainUI().destroyPopup(); // as the available popup options change while recording video
-        if( main_activity.getMainUI().isExposureUIOpen() ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "need to update exposure UI for stop video recording");
-            // need to update the exposure UI when starting/stopping video recording, to remove/add
-            // ability to switch between auto and manual
-            main_activity.getMainUI().setupExposureUI();
-        }
+
+        main_activity.onStoppedVideo();
+
         if( subtitleVideoTimerTask != null ) {
             subtitleVideoTimerTask.cancel();
             subtitleVideoTimerTask = null;
         }
-
         boolean done = broadcastVideo(video_method, uri, filename);
         if( MyDebug.LOG )
             Log.d(TAG, "done? " + done);

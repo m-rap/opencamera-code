@@ -2698,6 +2698,27 @@ public class MainUI {
         }
     }
 
+    public void onTouchedPreview() {
+        closeExposureUI();
+        closePopup();
+        closeAEMeteringUI();
+        closeAutofocusUI();
+    }
+
+    public void onStartingVideo() {
+        closeExposureUI();
+        closePopup();
+        closeAEMeteringUI();
+        closeAutofocusUI();
+    }
+
+    public void onStoppingVideo() {
+        closeExposureUI();
+        closePopup();
+        closeAEMeteringUI();
+        closeAutofocusUI();
+    }
+
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if( MyDebug.LOG )
             Log.d(TAG, "onKeyDown: " + keyCode);

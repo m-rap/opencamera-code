@@ -1870,6 +1870,77 @@ public class MainActivity extends Activity {
         openSettings();
     }
 
+    public void onTouchedPreview() {
+        mainUI.onTouchedPreview();
+    }
+
+    public void onStartingVideo(boolean lockVideoPreference) {
+        if( lockVideoPreference ) {
+            lockScreen();
+        }
+        stopAudioListeners(); // important otherwise MediaRecorder will fail to start() if we have an audiolistener! Also don't want to have the speech recognizer going off
+        ImageButton view = findViewById(R.id.take_photo);
+        view.setImageResource(R.drawable.take_video_recording);
+        view.setContentDescription( getResources().getString(R.string.stop_video) );
+        view.setTag(R.drawable.take_video_recording); // for testing
+
+//        mainUI.destroyPopup(); // as the available popup options change while recording video
+        mainUI.onStartingVideo();
+    }
+
+    public void onStartedVideo(boolean usePhotoVideoRecording) {
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+            if( !( mainUI.inImmersiveMode() && usingKitKatImmersiveModeEverything() ) ) {
+                View pauseVideoButton = findViewById(R.id.pause_video);
+                pauseVideoButton.setVisibility(View.VISIBLE);
+            }
+            mainUI.setPauseVideoContentDescription();
+        }
+        if( preview.supportsPhotoVideoRecording() && usePhotoVideoRecording ) {
+            if( !( mainUI.inImmersiveMode() && usingKitKatImmersiveModeEverything() ) ) {
+                View takePhotoVideoButton = findViewById(R.id.take_photo_when_video_recording);
+                takePhotoVideoButton.setVisibility(View.VISIBLE);
+            }
+        }
+
+        // already closed when starting video
+//        if( main_activity.getMainUI().isExposureUIOpen() ) {
+//            if( MyDebug.LOG )
+//                Log.d(TAG, "need to update exposure UI for start video recording");
+//            // need to update the exposure UI when starting/stopping video recording, to remove/add
+//            // ability to switch between auto and manual
+//            main_activity.getMainUI().setupExposureUI();
+//        }
+    }
+
+    public void onStoppingVideo() {
+        unlockScreen();
+        ImageButton view = findViewById(R.id.take_photo);
+        view.setImageResource(R.drawable.take_video_selector);
+        view.setContentDescription( getResources().getString(R.string.start_video) );
+        view.setTag(R.drawable.take_video_selector); // for testing
+
+        mainUI.onStoppingVideo();
+    }
+
+    public void onStoppedVideo() {
+        View pauseVideoButton = findViewById(R.id.pause_video);
+        pauseVideoButton.setVisibility(View.GONE);
+        View takePhotoVideoButton = findViewById(R.id.take_photo_when_video_recording);
+        takePhotoVideoButton.setVisibility(View.GONE);
+        mainUI.setPauseVideoContentDescription(); // just to be safe
+        mainUI.destroyPopup(); // as the available popup options change while recording video
+
+        // already closed when stopping
+//        if( mainUI.isExposureUIOpen() ) {
+//            if( MyDebug.LOG )
+//                Log.d(TAG, "need to update exposure UI for stop video recording");
+//            // need to update the exposure UI when starting/stopping video recording, to remove/add
+//            // ability to switch between auto and manual
+//            mainUI.setupExposureUI();
+//        }
+    }
+
     public boolean popupIsOpen() {
         return mainUI.popupIsOpen();
     }
