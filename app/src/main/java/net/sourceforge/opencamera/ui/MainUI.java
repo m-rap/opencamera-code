@@ -1397,7 +1397,7 @@ public class MainUI {
             Log.d(TAG, "toggleExposureUI");
         closePopup();
         closeAEMeteringUI();
-        closeAutofocusUI();
+        af_uis.close();
         mSelectingExposureUIElement = false;
         if( isExposureUIOpen() ) {
             closeExposureUI();
@@ -1416,7 +1416,7 @@ public class MainUI {
     public void toggleAEMeteringUI() {
         closePopup();
         closeExposureUI();
-        closeAutofocusUI();
+        af_uis.close();
         if (isAEMeteringUIOpen()) {
             closeAEMeteringUI();
         } else if (main_activity.getPreview().getCameraController() != null) {
@@ -1431,10 +1431,10 @@ public class MainUI {
         closeAEMeteringUI();
         closeExposureUI();
         closePopup();
-        if (isAutofocusUIOpen()) {
-            closeAutofocusUI();
+        if (af_uis.isOpen()) {
+            af_uis.close();
         } else {
-            setupAutofocusUI();
+            af_uis.setup();
         }
     }
 
@@ -1459,29 +1459,6 @@ public class MainUI {
                 view.findViewById(R.id.metering_avg_outside),
                 view.findViewById(R.id.metering_touch_outside),
                 view.findViewById(R.id.metering_center_outside));
-    }
-
-    private boolean isAutofocusUIOpen() {
-        ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
-        return view.getVisibility() == View.VISIBLE;
-    }
-
-    public void closeAutofocusUI() {
-        if (af_uis.container != null) {
-            af_uis.container.setVisibility(View.GONE);
-        }
-    }
-
-    private void setupAutofocusUI() {
-        if (af_uis.container == null) {
-            af_uis.container = main_activity.findViewById(R.id.autofocus_container);
-        }
-        af_uis.container.setVisibility(View.VISIBLE);
-        if (af_uis.focusOptionButtons == null) {
-            MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
-            af_uis.focusOptionButtons = PopupView.setupFocusPane(main_activity, photo_mode, af_uis.container, 280);
-            main_activity.getPreview().addFocusChangeListener(af_uis);
-        }
     }
 
     private void initRemoteControlForExposureUI() {
@@ -1922,9 +1899,8 @@ public class MainUI {
         }
     }
 
-    public class AFUIs implements Preview.FocusChangeListener {
+    public class AFUIs extends ContainerPopup implements Preview.FocusChangeListener {
         ImageButton autofocus_button;
-        ViewGroup container = null;
         PopupView.ButtonOptionMap focusOptionButtons = null;
 
         @Override
@@ -1958,6 +1934,29 @@ public class MainUI {
                 if (bm != null)
                     autofocus_button.setImageBitmap(bm);
             }
+        }
+
+        @Override
+        public void setup() {
+            if (container == null) {
+                container = main_activity.findViewById(R.id.autofocus_container);
+            }
+            container.setVisibility(View.VISIBLE);
+            if (focusOptionButtons == null) {
+                MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
+                focusOptionButtons = PopupView.setupFocusPane(main_activity, photo_mode, container, 280);
+                main_activity.getPreview().addFocusChangeListener(af_uis);
+            }
+        }
+
+        @Override
+        public boolean isOpen() {
+//            ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
+//            return view.getVisibility() == View.VISIBLE;
+            if (container == null) {
+                return false;
+            }
+            return container.getVisibility() == View.VISIBLE;
         }
     }
 
@@ -2560,7 +2559,7 @@ public class MainUI {
 
         closeExposureUI();
         closeAEMeteringUI();
-        closeAutofocusUI();
+        af_uis.close();
         main_activity.getPreview().cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         main_activity.stopAudioListeners();
 
@@ -2702,21 +2701,21 @@ public class MainUI {
         closeExposureUI();
         closePopup();
         closeAEMeteringUI();
-        closeAutofocusUI();
+        af_uis.close();
     }
 
     public void onStartingVideo() {
         closeExposureUI();
         closePopup();
         closeAEMeteringUI();
-        closeAutofocusUI();
+        af_uis.close();
     }
 
     public void onStoppingVideo() {
         closeExposureUI();
         closePopup();
         closeAEMeteringUI();
-        closeAutofocusUI();
+        af_uis.close();
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
