@@ -9,6 +9,7 @@ import net.sourceforge.opencamera.preview.ApplicationInterface;
 import net.sourceforge.opencamera.preview.Preview;
 import net.sourceforge.opencamera.R;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -102,6 +103,9 @@ public class MainUI {
         if( MyDebug.LOG )
             Log.d(TAG, "MainUI");
         this.main_activity = main_activity;
+
+        ae_metering_uis = new AEMeteringUIs(main_activity, R.id.metering_container_outside);
+        af_uis = new AFUIs(main_activity, R.id.autofocus_container);
 
         this.setSeekbarColors();
     }
@@ -1396,7 +1400,7 @@ public class MainUI {
         if( MyDebug.LOG )
             Log.d(TAG, "toggleExposureUI");
         closePopup();
-        closeAEMeteringUI();
+        ae_metering_uis.close();
         af_uis.close();
         mSelectingExposureUIElement = false;
         if( isExposureUIOpen() ) {
@@ -1418,9 +1422,9 @@ public class MainUI {
         closeExposureUI();
         af_uis.close();
         if (isAEMeteringUIOpen()) {
-            closeAEMeteringUI();
+            ae_metering_uis.close();
         } else if (main_activity.getPreview().getCameraController() != null) {
-            setupAEMeteringUI();
+            ae_metering_uis.setup();
         }
     }
 
@@ -1428,7 +1432,7 @@ public class MainUI {
      * Opens or close autofocus settings
      */
     public void toggleAutofocusUI() {
-        closeAEMeteringUI();
+        ae_metering_uis.close();
         closeExposureUI();
         closePopup();
         if (af_uis.isOpen()) {
@@ -1441,24 +1445,6 @@ public class MainUI {
     private boolean isAEMeteringUIOpen() {
         View view = main_activity.findViewById(R.id.metering_container_outside);
         return view.getVisibility() == View.VISIBLE;
-    }
-
-    public void closeAEMeteringUI() {
-        ae_metering_uis.metering_avg = null;
-        ae_metering_uis.metering_touch = null;
-        ae_metering_uis.metering_center = null;
-        View view = main_activity.findViewById(R.id.metering_container_outside);
-        view.setVisibility(View.GONE);
-    }
-
-    private void setupAEMeteringUI() {
-        View view = main_activity.findViewById(R.id.metering_container_outside);
-        view.setVisibility(View.VISIBLE);
-
-        setupAEMeteringPane(
-                view.findViewById(R.id.metering_avg_outside),
-                view.findViewById(R.id.metering_touch_outside),
-                view.findViewById(R.id.metering_center_outside));
     }
 
     private void initRemoteControlForExposureUI() {
@@ -1827,11 +1813,47 @@ public class MainUI {
     private int iso_button_manual_index = -1;
     private final static String manual_iso_value = "m";
 
-    public class AEMeteringUIs {
+    public class AEMeteringUIs extends ContainerPopup {
         View metering_avg = null;
         View metering_touch = null;
         View metering_center = null;
         ImageButton metering_button = null;
+
+        public AEMeteringUIs(Activity context, int containerRes) {
+            super(context, containerRes);
+
+            ViewGroup view = getContainer();
+            metering_avg = view.findViewById(R.id.metering_avg_outside);
+            metering_touch = view.findViewById(R.id.metering_touch_outside);
+            metering_center = view.findViewById(R.id.metering_center_outside);
+
+            View.OnClickListener meteringOnClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (MyDebug.LOG && v != null) {
+                        Log.d(TAG, "clicked " + v.getResources().getResourceName(v.getId()));
+                    }
+
+                    Preview pr = main_activity.getPreview();
+
+                    if (v != null) {
+                        if (v == metering_avg) {
+                            pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_AVERAGE);
+                        } else if (v == metering_touch) {
+                            pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_TOUCH);
+                        } else if (v == metering_center) {
+                            pr.setAEMeteringMode(CameraController.AEMeteringMode.AEMETERING_CENTER);
+                        }
+                    }
+
+                    ae_metering_uis.onAEMeteringChange();
+                }
+            };
+
+            metering_avg.setOnClickListener(meteringOnClickListener);
+            metering_touch.setOnClickListener(meteringOnClickListener);
+            metering_center.setOnClickListener(meteringOnClickListener);
+        }
 
         public void onAEMeteringChange() {
             Preview pr = main_activity.getPreview();
@@ -1897,11 +1919,36 @@ public class MainUI {
                 editor.apply();
             }
         }
+
+        @Override
+        public void setup() {
+            ViewGroup view = getContainer();
+            view.setVisibility(View.VISIBLE);
+            onAEMeteringChange();
+
+//            setupAEMeteringPane(
+//                    view.findViewById(R.id.metering_avg_outside),
+//                    view.findViewById(R.id.metering_touch_outside),
+//                    view.findViewById(R.id.metering_center_outside));
+        }
+
+//        @Override
+//        public void close() {
+//            ae_metering_uis.metering_avg = null;
+//            ae_metering_uis.metering_touch = null;
+//            ae_metering_uis.metering_center = null;
+//
+//            super.close();
+//        }
     }
 
     public class AFUIs extends ContainerPopup implements Preview.FocusChangeListener {
         ImageButton autofocus_button;
         PopupView.ButtonOptionMap focusOptionButtons = null;
+
+        public AFUIs(Activity context, int containerRes) {
+            super(context, containerRes);
+        }
 
         @Override
         public void onFocusChanged(String focus_value) {
@@ -1938,9 +1985,7 @@ public class MainUI {
 
         @Override
         public void setup() {
-            if (container == null) {
-                container = main_activity.findViewById(R.id.autofocus_container);
-            }
+            ViewGroup container = getContainer();
             container.setVisibility(View.VISIBLE);
             if (focusOptionButtons == null) {
                 MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
@@ -1949,19 +1994,16 @@ public class MainUI {
             }
         }
 
-        @Override
-        public boolean isOpen() {
-//            ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
-//            return view.getVisibility() == View.VISIBLE;
-            if (container == null) {
-                return false;
-            }
-            return container.getVisibility() == View.VISIBLE;
-        }
+//        @Override
+//        public boolean isOpen() {
+////            ViewGroup view = main_activity.findViewById(R.id.autofocus_container);
+////            return view.getVisibility() == View.VISIBLE;
+//
+//        }
     }
 
-    public AEMeteringUIs ae_metering_uis = new AEMeteringUIs();
-    public AFUIs af_uis = new AFUIs();
+    public AEMeteringUIs ae_metering_uis;
+    public AFUIs af_uis;
 
     private void setupAEMeteringPane(final View metering_avg, final View metering_touch, final View metering_center) {
         ae_metering_uis.metering_avg = metering_avg;
@@ -2558,7 +2600,7 @@ public class MainUI {
             Log.d(TAG, "open popup");
 
         closeExposureUI();
-        closeAEMeteringUI();
+        ae_metering_uis.close();
         af_uis.close();
         main_activity.getPreview().cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
         main_activity.stopAudioListeners();
@@ -2700,21 +2742,21 @@ public class MainUI {
     public void onTouchedPreview() {
         closeExposureUI();
         closePopup();
-        closeAEMeteringUI();
+        ae_metering_uis.close();
         af_uis.close();
     }
 
     public void onStartingVideo() {
         closeExposureUI();
         closePopup();
-        closeAEMeteringUI();
+        ae_metering_uis.close();
         af_uis.close();
     }
 
     public void onStoppingVideo() {
         closeExposureUI();
         closePopup();
-        closeAEMeteringUI();
+        ae_metering_uis.close();
         af_uis.close();
     }
 
